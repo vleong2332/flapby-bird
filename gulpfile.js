@@ -1,6 +1,6 @@
 var gulp       = require('gulp'),
 	uglify     = require('gulp-uglify'),
-	reload     = require('gulp-livereload'),
+	livereload = require('gulp-livereload'),
 	jshint     = require('gulp-jshint'),
 	sass       = require('gulp-sass'),
 	imagemin   = require('gulp-imagemin'),
@@ -28,12 +28,18 @@ gulp.task('jshint', function() {
 gulp.task('sass', function() {
 	return gulp.src('site/scss/*.scss')
 		.pipe(sass())
-		.pipe(gulp.dest('site/css'));
+		.pipe(gulp.dest('site/css'))
+		.pipe(livereload());
 });
 gulp.task('watch', function() {
 	gulp.watch('site/js/*.js', ['jshint']);
 	gulp.watch('site/scss/*.scss', ['sass']);
 });
+gulp.task('livereload', function() {
+	livereload.listen();
+	livereload.changed('site/index.html');
+});
+
 
 /* Deployment Tasks */
 gulp.task('build', ['jshint', 'sass', 'html', 'scripts', 'styles', 'images']);
