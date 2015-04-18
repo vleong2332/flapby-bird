@@ -15,11 +15,13 @@
         <style>
             html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}
         </style>
-        <link rel="stylesheet" href="css/normalize.min.css">
+        <!-- <link rel="stylesheet" href="css/normalize.min.css"> -->
         <link rel="stylesheet" href="css/main.css">
         <!-- <script src="js/vendor/modernizr-2.8.3.min.js"></script> -->
     </head>
     <body>
+
+
         <!--[if lt IE 8]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
@@ -27,8 +29,7 @@
         <!-- Add your site or application content here -->
         <section id="hero">
             <div class="container">
-                <img src="" alt="Flapby Bird Logo" />
-                <h1>Flapby Bird</h1>
+                <img src="img/flapby_bird_logo.png" alt="Flapby Bird Logo" />
                 <h2>When you'd <span>need a break</span></h2>
                 <!-- interchange span content with: want to kill time, love a challenge, just want to have fun -->
                 <!-- Embed the following form from Woofoo -->   
@@ -40,7 +41,7 @@
                 <!-- <button type="button">Flap Away</button> -->
                 <section id="social">
                     <ul>
-                        <li>facebook</li>
+                        <li><div class="fb-share-button" data-href="https://developers.facebook.com/docs/plugins/" data-layout="button_count"></div></li>
                         <li>twitter</li>
                         <li>google+</li>
                     </ul>
@@ -48,7 +49,7 @@
             </div>
         </section>
 
-        <footer>
+        <footer hidden>
             <div id="credit">
                 <p>Credit for any mats used</p>
             </div>
@@ -60,6 +61,18 @@
         <script src="http//cdn.jsdelivr.net/velocity/1.2.2/velocity.ui.min.js"></script>
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
+
+        <!-- Facebook share button -->
+        <div id="fb-root"></div>
+        <script>
+            (function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.3";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        </script>
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>

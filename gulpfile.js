@@ -32,12 +32,14 @@ gulp.task('sass', function() {
 		.pipe(livereload());
 });
 gulp.task('watch', function() {
+	livereload.listen();
 	gulp.watch('site/js/*.js', ['jshint']);
 	gulp.watch('site/scss/*.scss', ['sass']);
+	gulp.watch('site/scss/*/*', ['sass']);
+	gulp.watch('site/index.html', ['refresh']);
 });
-gulp.task('livereload', function() {
-	livereload.listen();
-	livereload.changed('site/index.html');
+gulp.task('refresh', function() {
+	livereload.reload();
 });
 
 

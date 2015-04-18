@@ -1,0 +1,34 @@
+@import 'normalize';
+@import 'base/base';
+@import 'mixins/mixins';
+
+body {
+	background-color: $heroBackgroundColor;
+}
+#hero {
+	width: 100%;
+	padding: 1rem;
+	@include centerer;
+	text-align: center;
+	background-color: inherit;
+
+	img {
+		max-width: 300px;
+	}
+	h2 {
+		margin: 0.5rem auto 2rem auto;
+	}
+	input, button {
+		width: 280px;
+	}
+	button {
+		background-color: $outlineColor;
+		color: white;
+		border: 3px solid $outlineColor;
+	}
+	input {
+		text-align: center;
+		font-family: $inputFont;
+		border: 3px solid $outlineColor;
+	}
+}
