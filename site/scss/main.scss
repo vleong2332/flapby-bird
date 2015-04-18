@@ -14,12 +14,27 @@ body {
 
 	img {
 		max-width: 300px;
+		@media screen and (min-width: $wideScreen) {
+			max-width: 600px;
+		}
 	}
 	h2 {
-		margin: 0.5rem auto 2rem auto;
+		margin: 0.5rem auto 7rem auto!important; /* Why this needs to be important? */
+		font-family: $headingFont;
+		font-size: 1.65rem;
+		margin-top: 1rem;
+		margin-bottom: 1rem;
+		@media screen and (min-width: $wideScreen) {
+			font-size: 2rem;
+		}
 	}
 	input, button {
 		width: 280px;
+		display: block;
+		margin: 0 auto;
+		@media screen and (min-width: $wideScreen) {
+			width: 400px;
+		}
 	}
 	button {
 		background-color: $outlineColor;
@@ -31,4 +46,11 @@ body {
 		font-family: $inputFont;
 		border: 3px solid $outlineColor;
 	}
+	li {
+		display: inline-block;
+		margin: 0;
+	}
+}
+#social li {
+	vertical-align: top;
 }

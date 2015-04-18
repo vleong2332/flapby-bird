@@ -340,7 +340,8 @@ input, button {
   padding: 0.3rem; }
 
 ul {
-  list-style-type: none; }
+  list-style-type: none;
+  padding: 0; }
 
 body {
   background-color: #AEA; }
@@ -356,10 +357,26 @@ body {
   background-color: inherit; }
   #hero img {
     max-width: 300px; }
+    @media screen and (min-width: 1600px) {
+      #hero img {
+        max-width: 600px; } }
   #hero h2 {
-    margin: 0.5rem auto 2rem auto; }
+    margin: 0.5rem auto 7rem auto !important;
+    /* Why this needs to be important? */
+    font-family: 'FlappyBird';
+    font-size: 1.65rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem; }
+    @media screen and (min-width: 1600px) {
+      #hero h2 {
+        font-size: 2rem; } }
   #hero input, #hero button {
-    width: 280px; }
+    width: 280px;
+    display: block;
+    margin: 0 auto; }
+    @media screen and (min-width: 1600px) {
+      #hero input, #hero button {
+        width: 400px; } }
   #hero button {
     background-color: #4C3D46;
     color: white;
@@ -368,3 +385,9 @@ body {
     text-align: center;
     font-family: 'Helvetica', 'Arial', sans-serif;
     border: 3px solid #4C3D46; }
+  #hero li {
+    display: inline-block;
+    margin: 0; }
+
+#social li {
+  vertical-align: top; }
