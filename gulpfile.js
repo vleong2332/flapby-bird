@@ -33,7 +33,7 @@ gulp.task('sass', function() {
 });
 gulp.task('watch', function() {
 	livereload.listen();
-	gulp.watch('site/js/*.js', ['jshint']);
+	gulp.watch('site/js/*.js', ['jshint', 'refresh']);
 	gulp.watch('site/scss/*.scss', ['sass']);
 	gulp.watch('site/scss/*/*', ['sass']);
 	gulp.watch('site/index.html', ['refresh']);
