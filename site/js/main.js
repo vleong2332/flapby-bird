@@ -5,7 +5,7 @@ $('#hero img').on('mouseover', function() {
 	},
 	{
 		easing: "easeoutback",
-	}, 1000);
+	}, 800);
 });
 
 $('#hero img').on('mouseout', function() {

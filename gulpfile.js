@@ -25,22 +25,28 @@ gulp.task('jshint', function() {
 		.pipe(jshint())
 		.pipe(jshint.reporter('default'));
 });
+gulp.task('concat', function() {
+	return gulp.src('site/js/*.js')
+		.pipe(concat('all.js'))
+		.pipe(gulp.dest('site/js'));
+});
 gulp.task('sass', function() {
 	return gulp.src('site/scss/*.scss')
 		.pipe(sass())
 		.pipe(gulp.dest('site/css'))
 		.pipe(livereload());
 });
+gulp.task('refresh', function() {
+	livereload.reload();
+});
 gulp.task('watch', function() {
 	livereload.listen();
-	gulp.watch('site/js/*.js', ['jshint', 'refresh']);
+	gulp.watch('site/js/*.js', ['jshint', 'concat', 'refresh']);
 	gulp.watch('site/scss/*.scss', ['sass']);
 	gulp.watch('site/scss/*/*', ['sass']);
 	gulp.watch('site/index.html', ['refresh']);
 });
-gulp.task('refresh', function() {
-	livereload.reload();
-});
+
 
 
 /* Deployment Tasks */
@@ -51,16 +57,16 @@ gulp.task('html', function() {
 		.pipe(gulp.dest('build/'));
 });
 gulp.task('scripts', function() {
-	return browserify('./site/js/main.js')
+	return browserify('./site/js/all.js')
 		.bundle()
-		.pipe(source('app.js'))
+		.pipe(source('all.js'))
 		.pipe(buffer())
 		.pipe(uglify())
 		.pipe(gulp.dest('build/js'));
 });
 gulp.task('styles', function() {
 	gulp.src('site/css/*.css')
-		.pipe(concat('styles.css'))
+		.pipe(concat('main.css'))
 		.pipe(uglifycss())
 		.pipe(gulp.dest('build/css'));
 });
