@@ -26,7 +26,13 @@
         <!-- Add your site or application content here -->
         <section id="hero">
             <div class="container">
-                <img src="img/flapby_bird_logo.png" alt="Flapby Bird Logo" />
+                <img alt="Flapby Bird Logo"
+                     sizes="(min-width: 1600px) 35vw, 100vw"
+                     src="img/flapby_bird_logo.png" 
+                     srcset="img/flapby_bird_logo_small.png 700w,
+                             img/flapby_bird_logo_medium.png 1200w,
+                             img/flapby_bird_logo_large.png 1600w"
+                />
                 <h2>When you'd <span>need a break</span></h2>
                 <!-- interchange span content with: want to kill time, love a challenge, just want to have fun -->
                 <!-- Embed the following form from Woofoo -->
@@ -54,10 +60,16 @@
 
         <link rel="stylesheet" href="css/main.css">
 
+        <!-- jQuery -->
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
+        <!-- Velocity JS -->
         <script src="//cdn.jsdelivr.net/velocity/1.2.2/velocity.min.js"></script>
         <script src="//cdn.jsdelivr.net/velocity/1.2.2/velocity.ui.min.js"></script>
+        <!-- Picturefill JS -->
+        <script>document.createElement("picture");</script>
+        <script src="js/vendor/picturefill-2.3.0.min.js" async></script>
+        <!-- Custom JS -->
         <script src="js/all.js" async defer></script>
 
         <!-- Facebook share button -->
