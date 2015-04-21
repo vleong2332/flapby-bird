@@ -28,7 +28,7 @@ gulp.task('jshint', function() {
 		.pipe(jshint.reporter('default'));
 });
 gulp.task('concat', function() {
-	return gulp.src('site/js/*.js')
+	return gulp.src(['site/js/main.js', 'site/js/plugins.js'])
 		.pipe(concat('all.js'))
 		.pipe(gulp.dest('site/js'));
 });

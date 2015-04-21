@@ -17,3 +17,12 @@ $('#hero img').on('mouseout', function() {
 		easing: "spring"
 	}, 250);
 });
+
+$(function() {
+	$('.typed-js').typed({
+		strings: ["need a break", "want to kill time", "love a challenge", "like to have fun"],
+		typeSpeed: 0,
+		backDelay: 1500,
+		loop: true
+	});
+});
