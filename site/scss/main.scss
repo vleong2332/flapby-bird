@@ -1,10 +1,12 @@
 @import 'normalize';
 @import 'base/base';
 @import 'mixins/mixins';
+@import 'bourbon/bourbon';
 
 body {
 	background-color: $heroBackgroundColor;
 }
+
 #hero {
 	width: 100%;
 	padding: 1rem;
@@ -57,22 +59,34 @@ body {
 
 .typed-cursor{
     opacity: 1;
-    -webkit-animation: blink 0.7s infinite;
-    -moz-animation: blink 0.7s infinite;
-    animation: blink 0.7s infinite;
+    @include animation(blink 0.7s infinite);
 }
-@keyframes blink{
-    0% { opacity:1; }
-    50% { opacity:0; }
-    100% { opacity:1; }
+@include keyframes(blink) {
+	 0% { opacity:1; }
+     50% { opacity:0; }
+     100% { opacity:1; }
 }
-@-webkit-keyframes blink{
-    0% { opacity:1; }
-    50% { opacity:0; }
-    100% { opacity:1; }
+
+#performance {
+	position: absolute;
+	top: 0;
+	left: 0;
+	font-family: 'Lucida Console', sans-serif;
+	font-size: 0.75rem;
+	background-color: rgba(0,0,0,0.1);
+	padding: 0 0.5rem;
+	@media screen and (max-width: 480px) {
+		display: none;
+	}
 }
-@-moz-keyframes blink{
-    0% { opacity:1; }
-    50% { opacity:0; }
-    100% { opacity:1; }
+#toggle-resources {
+	cursor: pointer;
+	text-decoration: underline;
+}
+.resource {
+	border-bottom: 1px dashed rgba(0,0,0,0.25);
+	p {
+		width: 320px;
+		word-wrap: break-word;
+	}
 }
