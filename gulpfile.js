@@ -1,29 +1,37 @@
 var gulp       = require('gulp'),
-	uglify     = require('gulp-uglify'),
-	livereload = require('gulp-livereload'),
-	jshint     = require('gulp-jshint'),
-	sass       = require('gulp-sass'),
-	imagemin   = require('gulp-imagemin'),
+	bourbon    = require('node-bourbon'),
 	bower      = require('gulp-bower'),
+	browserify = require('browserify'),
+	buffer     = require('vinyl-buffer'),
 	concat     = require('gulp-concat'),
 	connect    = require('gulp-connect'),
+	jshint     = require('gulp-jshint'),
+	imagemin   = require('gulp-imagemin'),
+	livereload = require('gulp-livereload'),
 	minifyHTML = require('gulp-minify-html'),
-	rename     = require('gulp-rename'),
-	bourbon    = require('node-bourbon'),
 	neat       = require('node-neat'),
-	buffer     = require('vinyl-buffer'),
+	rename     = require('gulp-rename'),
+	sass       = require('gulp-sass'),
 	source     = require('vinyl-source-stream'),
-	browserify = require('browserify'),
+	uglify     = require('gulp-uglify'),
 	uglifycss  = require('gulp-uglifycss');
 
 
 gulp.task('default', ['jshint', 'sass', 'watch']);
 gulp.task('build', ['jshint', 'sass', 'html', 'scripts', 'vendor', 'styles', 'images', 'fonts']);
 
+/* WATCHING */
+gulp.task('watch', function() {
+	livereload.listen();
+	gulp.watch(['site/js/*.js', 'site/game/js/**/*'], ['jshint', 'game-scripts', 'concat', 'refresh']);
+	gulp.watch(['site/scss/*.scss', 'site/scss/*/*'], ['sass', 'refresh']);
+	gulp.watch(['site/*.html', 'site/game/*.html'], ['refresh']);
+});
+
 
 /* Development Tasks */
 gulp.task('jshint', function() {
-	return gulp.src('site/js/*.js')
+	return gulp.src(['site/js/*.js', 'site/game/js/**/*', '!site/game/js/bundled.js'])
 		.pipe(jshint())
 		.pipe(jshint.reporter('default'));
 });
@@ -41,20 +49,10 @@ gulp.task('refresh', function() {
 	livereload.reload();
 });
 
-/* WATCHING */
-gulp.task('watch', function() {
-	livereload.listen();
-	gulp.watch('site/js/*.js', ['jshint', 'concat', 'refresh']);
-	gulp.watch('site/scss/*.scss', ['sass', 'refresh']);
-	gulp.watch('site/scss/*/*', ['sass', 'refresh']);
-	gulp.watch('site/*.html', ['refresh']);
-});
-
-
 
 /* Deployment Tasks */
 gulp.task('html', function() {
-	gulp.src('site/*.html')
+	return gulp.src('site/*.html')
 		.pipe(minifyHTML())
 		.pipe(gulp.dest('build/'));
 });
@@ -66,23 +64,30 @@ gulp.task('scripts', function() {
 		.pipe(uglify())
 		.pipe(gulp.dest('build/js'));
 });
+gulp.task('game-scripts', function() {
+	return browserify('./site/game/js/main.js')
+		.bundle()
+		.pipe(source('bundled.js'))
+		.pipe(buffer())
+		.pipe(gulp.dest('./site/game/js'))
+});
 gulp.task('styles', function() {
-	gulp.src('site/css/*.css')
+	return gulp.src('site/css/*.css')
 		.pipe(concat('main.css'))
 		.pipe(uglifycss())
 		.pipe(gulp.dest('build/css'));
 });
 gulp.task('images', function() {
-	gulp.src('site/img/*')
+	return gulp.src('site/img/*')
 		.pipe(imagemin())
 		.pipe(gulp.dest('build/img'));
 });
 gulp.task('fonts', function() {
-	gulp.src('site/fonts/*')
+	return gulp.src('site/fonts/*')
 		.pipe(gulp.dest('build/fonts'));
 });
 gulp.task('vendor', function() {
-	gulp.src('site/js/vendor/*.js')
+	return gulp.src('site/js/vendor/*.js')
 		.pipe(uglify())
 		.pipe(gulp.dest('build/js/vendor'));
 });
