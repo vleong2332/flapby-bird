@@ -24,7 +24,7 @@ gulp.task('build', ['jshint', 'sass', 'html', 'scripts', 'vendor', 'styles', 'im
 gulp.task('watch', function() {
 	livereload.listen();
 	gulp.watch(['site/js/*.js', 'site/game/js/**/*'], ['jshint', 'game-scripts', 'concat', 'refresh']);
-	gulp.watch(['site/scss/*.scss', 'site/scss/*/*'], ['sass', 'refresh']);
+	gulp.watch(['site/scss/*.scss', 'site/scss/*/*', 'site/game/css/*.css'], ['sass', 'refresh']);
 	gulp.watch(['site/*.html', 'site/game/*.html'], ['refresh']);
 });
 
