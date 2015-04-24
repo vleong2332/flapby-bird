@@ -27,6 +27,10 @@ GraphicsSystem.prototype.tick = function() {
 
 	// Clear the canvas
 	this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	this.context.save();
+	// Origin is at the middle bottom of the screen
+	this.context.translate(this.canvas.width / 2, this.canvas.height);
+	this.context.scale(this.canvas.height, -this.canvas.height);
 
 	// Rendering goes here
 	// Go through all the entities
@@ -40,6 +44,8 @@ GraphicsSystem.prototype.tick = function() {
 		// Call draw() if it has graphics component
 		entity.components.graphics.draw(this.context);
 	}
+
+	this.context.restore();
 
 	// Continue the render loop - calls this function again
 	window.requestAnimationFrame(this.tick.bind(this));
