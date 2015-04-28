@@ -9,7 +9,7 @@ var BirdGraphicsComponent = function(entity) {
 // Will be called by systems
 // Access syntax: (BirdGraphicsComponent).draw()
 BirdGraphicsComponent.prototype.draw = function(context) {
-	  var position = {x: 0, y: 0.5};
+    var position = this.entity.components.physics.position;
 
     context.save();
     context.translate(position.x, position.y);

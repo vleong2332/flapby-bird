@@ -1,0 +1,15 @@
+application: flapby-bird
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true  #Why not "yes"?
+
+handlers:
+- url: /build
+	static_dir: build
+
+- url: /site
+	static_dir: site
+
+- url: /.*
+  script: flabby-bird.app
