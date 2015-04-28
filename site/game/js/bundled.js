@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // Component declaration
 // Will initialized when created in entity
 var BirdGraphicsComponent = function(entity) {
-	// Tag which entity this component belongs to
-	this.entity = entity;
+    // Tag which entity this component belongs to
+    this.entity = entity;
 };
 
 // Declare draw()
@@ -30,19 +30,18 @@ BirdGraphicsComponent.prototype.draw = function(context) {
 
 exports.BirdGraphicsComponent = BirdGraphicsComponent;
 },{}],3:[function(require,module,exports){
-// Component declaration
-// Will initialized when created in entity
 var PipeGraphicsComponent = function(entity) {
-	// Tag which entity this component belongs to
 	this.entity = entity;
 };
 
-// Declare draw()
-// Will be called by systems
-// Access syntax (BirdGraphicsComponent).draw()
-PipeGraphicsComponent.prototype.draw = function() {
-	console.log("Drawing a pipe");
-};
+		PipeGraphicsComponent.prototype.draw = function(context) {
+			var position = this.entity.components.physics.position;
+
+			context.save();
+			context.fillStyle = '#006500';
+		  context.fillRect(position.x, position.y, 0.1, 0.3);
+		  context.restore();
+		};
 
 exports.PipeGraphicsComponent = PipeGraphicsComponent;
 },{}],4:[function(require,module,exports){
@@ -72,20 +71,16 @@ PhysicsComponent.prototype.update = function(delta) {
 
 exports.PhysicsComponent = PhysicsComponent;
 },{}],5:[function(require,module,exports){
-// Include components needed
 var graphicsComponent = require('../components/graphics/bird');
 var physicsComponent = require('../components/physics/physics');
 
-// Create Bird entity
 var Bird = function() {
 	var physics = new physicsComponent.PhysicsComponent(this);
 	physics.position.y = 0.5;
 	physics.acceleration.y = -1.5;
 
-	// Initialize components
 	var graphics = new graphicsComponent.BirdGraphicsComponent(this);
-	// Storing components in one object.
-	// Acess syntax will be (entity).components.(component)
+	
 	this.components = {
 		graphics: graphics,
 		physics: physics
@@ -94,24 +89,24 @@ var Bird = function() {
 
 exports.Bird = Bird;
 },{"../components/graphics/bird":2,"../components/physics/physics":4}],6:[function(require,module,exports){
-// Include components needed
 var graphicsComponent = require('../components/graphics/pipe');
+var physicsComponent  = require('../components/physics/physics');
 
-// Create Pipe entity
 var Pipe = function() {
-	console.log("Creating Pipe entity");
-
-	// Initialize components
 	var graphics = new graphicsComponent.PipeGraphicsComponent(this);
-	// Storing components in one object.
-	// Acess syntax will be (entity).components.(component)
+	var physics = new physicsComponent.PhysicsComponent(this);
+	physics.position.x = document.getElementById('main-canvas').offsetWidth/1000;
+	physics.position.y = 0;
+
+
 	this.components = {
-		graphics: graphics
+		graphics: graphics,
+		physics: physics
 	};
 };
 
 exports.Pipe = Pipe;
-},{"../components/graphics/pipe":3}],7:[function(require,module,exports){
+},{"../components/graphics/pipe":3,"../components/physics/physics":4}],7:[function(require,module,exports){
 var graphicsSystem = require('./systems/graphics');
 var physicsSystem = require('./systems/physics');
 var inputSystem = require('./systems/input');
@@ -119,21 +114,20 @@ var bird = require('./entities/bird');
 var pipe = require('./entities/pipe');
 
 var FlapbyBird = function() {
-	this.entities = [new bird.Bird(), new pipe.Pipe()];
+	this.entities = [new bird.Bird(), new pipe.Pipe(), new pipe.Pipe()];
 	this.graphics = new graphicsSystem.GraphicsSystem(this.entities);
 	this.physics = new physicsSystem.PhysicsSystem(this.entities);
 	this.input = new inputSystem.InputSystem(this.entities);
 };
 
-FlapbyBird.prototype.run = function() {
-	this.graphics.run();
-	this.physics.run();
-	this.input.run();
-};
+		FlapbyBird.prototype.run = function() {
+			this.graphics.run();
+			this.physics.run();
+			this.input.run();
+		};
 
 exports.FlapbyBird = FlapbyBird;
 },{"./entities/bird":5,"./entities/pipe":6,"./systems/graphics":8,"./systems/input":9,"./systems/physics":10}],8:[function(require,module,exports){
-// System declaration - will be called in game.
 var GraphicsSystem = function(entities) {
 	// Tag which entity the system belongs to
 	this.entities = entities;
@@ -142,51 +136,36 @@ var GraphicsSystem = function(entities) {
 };
 
 
-
-// Declare run() - will be called in game when game is called
-GraphicsSystem.prototype.run = function() {
-	// Run the render loop
-	window.requestAnimationFrame(this.tick.bind(this));
-};
+		GraphicsSystem.prototype.run = function() {
+			window.requestAnimationFrame(this.tick.bind(this));
+		};
 
 
+		GraphicsSystem.prototype.tick = function() {
+			if (this.canvas.width != this.canvas.offsetWidth ||
+				this.canvas.height  != this.canvas.offsetHeight) {
+				this.canvas.width  = this.canvas.offsetWidth;
+				this.canvas.height = this.canvas.offsetHeight;
+			}
 
-// tick() declaration
-GraphicsSystem.prototype.tick = function() {
-	// Set the canvas to the window size when resized
-	if (this.canvas.width != this.canvas.offsetWidth ||
-		this.canvas.height  != this.canvas.offsetHeight) {
-		this.canvas.width  = this.canvas.offsetWidth;
-		this.canvas.height = this.canvas.offsetHeight;
-	}
-
-	// Clear the canvas
-	this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-	this.context.save();
-	// Origin is at the middle bottom of the screen
-	this.context.translate(this.canvas.width / 2, this.canvas.height);
-	this.context.scale(this.canvas.height, -this.canvas.height);
-
-	// Rendering goes here
-	// Go through all the entities
-	for (var i = 0; i < this.entities.length; i++) {
-		var entity = this.entities[i];
-		// Check to see if an entity has graphics component
-		if (!('graphics' in entity.components)) {
-			// Skip to the next entity if it doesn't have graphics component
-			continue;
-		}
-		// Call draw() if it has graphics component
-		entity.components.graphics.draw(this.context);
-	}
-
-	this.context.restore();
-
-	// Continue the render loop - calls this function again
-	window.requestAnimationFrame(this.tick.bind(this));
-};
+			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			this.context.save();
+			this.context.translate(this.canvas.width / 2, this.canvas.height);
+			this.context.scale(this.canvas.height, -this.canvas.height);
 
 
+			for (var i = 0; i < this.entities.length; i++) {
+				var entity = this.entities[i];
+				if (!('graphics' in entity.components)) {
+					continue;
+				}
+				entity.components.graphics.draw(this.context);
+			}
+
+			this.context.restore();
+
+			window.requestAnimationFrame(this.tick.bind(this));
+		};
 
 exports.GraphicsSystem = GraphicsSystem;
 },{}],9:[function(require,module,exports){

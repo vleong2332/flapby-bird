@@ -1,8 +1,8 @@
 // Component declaration
 // Will initialized when created in entity
 var BirdGraphicsComponent = function(entity) {
-	// Tag which entity this component belongs to
-	this.entity = entity;
+    // Tag which entity this component belongs to
+    this.entity = entity;
 };
 
 // Declare draw()

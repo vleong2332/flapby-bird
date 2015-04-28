@@ -1,4 +1,3 @@
-// System declaration - will be called in game.
 var GraphicsSystem = function(entities) {
 	// Tag which entity the system belongs to
 	this.entities = entities;
@@ -7,50 +6,35 @@ var GraphicsSystem = function(entities) {
 };
 
 
-
-// Declare run() - will be called in game when game is called
-GraphicsSystem.prototype.run = function() {
-	// Run the render loop
-	window.requestAnimationFrame(this.tick.bind(this));
-};
+		GraphicsSystem.prototype.run = function() {
+			window.requestAnimationFrame(this.tick.bind(this));
+		};
 
 
+		GraphicsSystem.prototype.tick = function() {
+			if (this.canvas.width != this.canvas.offsetWidth ||
+				this.canvas.height  != this.canvas.offsetHeight) {
+				this.canvas.width  = this.canvas.offsetWidth;
+				this.canvas.height = this.canvas.offsetHeight;
+			}
 
-// tick() declaration
-GraphicsSystem.prototype.tick = function() {
-	// Set the canvas to the window size when resized
-	if (this.canvas.width != this.canvas.offsetWidth ||
-		this.canvas.height  != this.canvas.offsetHeight) {
-		this.canvas.width  = this.canvas.offsetWidth;
-		this.canvas.height = this.canvas.offsetHeight;
-	}
-
-	// Clear the canvas
-	this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-	this.context.save();
-	// Origin is at the middle bottom of the screen
-	this.context.translate(this.canvas.width / 2, this.canvas.height);
-	this.context.scale(this.canvas.height, -this.canvas.height);
-
-	// Rendering goes here
-	// Go through all the entities
-	for (var i = 0; i < this.entities.length; i++) {
-		var entity = this.entities[i];
-		// Check to see if an entity has graphics component
-		if (!('graphics' in entity.components)) {
-			// Skip to the next entity if it doesn't have graphics component
-			continue;
-		}
-		// Call draw() if it has graphics component
-		entity.components.graphics.draw(this.context);
-	}
-
-	this.context.restore();
-
-	// Continue the render loop - calls this function again
-	window.requestAnimationFrame(this.tick.bind(this));
-};
+			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			this.context.save();
+			this.context.translate(this.canvas.width / 2, this.canvas.height);
+			this.context.scale(this.canvas.height, -this.canvas.height);
 
 
+			for (var i = 0; i < this.entities.length; i++) {
+				var entity = this.entities[i];
+				if (!('graphics' in entity.components)) {
+					continue;
+				}
+				entity.components.graphics.draw(this.context);
+			}
+
+			this.context.restore();
+
+			window.requestAnimationFrame(this.tick.bind(this));
+		};
 
 exports.GraphicsSystem = GraphicsSystem;

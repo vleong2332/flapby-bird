@@ -1,16 +1,16 @@
-// Include components needed
 var graphicsComponent = require('../components/graphics/pipe');
+var physicsComponent  = require('../components/physics/physics');
 
-// Create Pipe entity
 var Pipe = function() {
-	console.log("Creating Pipe entity");
-
-	// Initialize components
 	var graphics = new graphicsComponent.PipeGraphicsComponent(this);
-	// Storing components in one object.
-	// Acess syntax will be (entity).components.(component)
+	var physics = new physicsComponent.PhysicsComponent(this);
+	physics.position.x = document.getElementById('main-canvas').offsetWidth/1000;
+	physics.position.y = 0;
+
+
 	this.components = {
-		graphics: graphics
+		graphics: graphics,
+		physics: physics
 	};
 };
 
