@@ -35,11 +35,14 @@ var PipeGraphicsComponent = function(entity) {
 };
 
 		PipeGraphicsComponent.prototype.draw = function(context) {
-			var position = this.entity.components.physics.position;
-
+			var position = this.entity.components.physics.position,
+					width    = this.entity.width,
+					height   = this.entity.height;
+					//gap      = this.entity.gap,
+					//buffer   = this.entity.buffer,
 			context.save();
 			context.fillStyle = '#006500';
-		  context.fillRect(position.x, position.y, 0.1, 0.3);
+		  context.fillRect(position.x, position.y, width, (position.y == 1 ? -height : height));
 		  context.restore();
 		};
 
@@ -61,13 +64,14 @@ var PhysicsComponent = function(entity) {
 	};
 };
 
-PhysicsComponent.prototype.update = function(delta) {
-	this.velocity.x += this.acceleration.x * delta;
-	this.velocity.y += this.acceleration.y * delta;
+		PhysicsComponent.prototype.update = function(delta) {
+			console.log('updating');
+			this.velocity.x += this.acceleration.x * delta;
+			this.velocity.y += this.acceleration.y * delta;
 
-	this.position.x += this.velocity.x * delta;
-	this.position.y += this.velocity.y * delta;
-};
+			this.position.x += this.velocity.x * delta;
+			this.position.y += this.velocity.y * delta;
+		};
 
 exports.PhysicsComponent = PhysicsComponent;
 },{}],5:[function(require,module,exports){
@@ -92,16 +96,21 @@ exports.Bird = Bird;
 var graphicsComponent = require('../components/graphics/pipe');
 var physicsComponent  = require('../components/physics/physics');
 
-var Pipe = function() {
+var Pipe = function(loc, height) {
+	//
 	var graphics = new graphicsComponent.PipeGraphicsComponent(this);
-	var physics = new physicsComponent.PhysicsComponent(this);
-	physics.position.x = document.getElementById('main-canvas').offsetWidth/1000;
-	physics.position.y = 0;
-
-
+	var physics  = new physicsComponent.PhysicsComponent(this);
+	//
+	this.width    = 0.2;
+	this.height   = height;
+	//
+	physics.position.x = 1 - this.width;
+	physics.position.y = (loc === "upper") ? 1 : 0;
+	physics.acceleration.x -= 0.1;
+	//
 	this.components = {
 		graphics: graphics,
-		physics: physics
+		physics:  physics
 	};
 };
 
@@ -114,7 +123,7 @@ var bird = require('./entities/bird');
 var pipe = require('./entities/pipe');
 
 var FlapbyBird = function() {
-	this.entities = [new bird.Bird(), new pipe.Pipe(), new pipe.Pipe()];
+	this.entities = [new bird.Bird()];
 	this.graphics = new graphicsSystem.GraphicsSystem(this.entities);
 	this.physics = new physicsSystem.PhysicsSystem(this.entities);
 	this.input = new inputSystem.InputSystem(this.entities);
@@ -128,16 +137,31 @@ var FlapbyBird = function() {
 
 exports.FlapbyBird = FlapbyBird;
 },{"./entities/bird":5,"./entities/pipe":6,"./systems/graphics":8,"./systems/input":9,"./systems/physics":10}],8:[function(require,module,exports){
+var pipe = require('../entities/pipe');
+
 var GraphicsSystem = function(entities) {
 	// Tag which entity the system belongs to
 	this.entities = entities;
 	this.canvas = document.getElementById('main-canvas');
 	this.context = this.canvas.getContext('2d');
+	this.createNewPipes = function() {
+		console.log('creating pipes');
+		var gap = Math.random() * (0.5 - 0.2) + 0.2;
+		var buffer = 0.1;
+		var ttlHeight = 1 - buffer - gap;
+		var uprHeight = buffer + (Math.random() * (ttlHeight - buffer) + buffer);
+		var lwrHeight = buffer + (ttlHeight - uprHeight);
+		this.entities.push(new pipe.Pipe('upper', uprHeight));
+		this.entities.push(new pipe.Pipe('lower', lwrHeight));
+		console.log(gap, uprHeight, lwrHeight);
+	};
 };
 
 
 		GraphicsSystem.prototype.run = function() {
 			window.requestAnimationFrame(this.tick.bind(this));
+			this.createNewPipes();
+			window.setInterval(this.createNewPipes.bind(this), 2000);
 		};
 
 
@@ -147,13 +171,12 @@ var GraphicsSystem = function(entities) {
 				this.canvas.width  = this.canvas.offsetWidth;
 				this.canvas.height = this.canvas.offsetHeight;
 			}
-
+			//
 			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 			this.context.save();
 			this.context.translate(this.canvas.width / 2, this.canvas.height);
 			this.context.scale(this.canvas.height, -this.canvas.height);
-
-
+			//
 			for (var i = 0; i < this.entities.length; i++) {
 				var entity = this.entities[i];
 				if (!('graphics' in entity.components)) {
@@ -161,14 +184,14 @@ var GraphicsSystem = function(entities) {
 				}
 				entity.components.graphics.draw(this.context);
 			}
-
+			//
 			this.context.restore();
-
+			//
 			window.requestAnimationFrame(this.tick.bind(this));
 		};
 
 exports.GraphicsSystem = GraphicsSystem;
-},{}],9:[function(require,module,exports){
+},{"../entities/pipe":6}],9:[function(require,module,exports){
 var InputSystem = function(entities) {
 	this.entities = entities;
 
@@ -188,33 +211,25 @@ var InputSystem = function(entities) {
 
 exports.InputSystem = InputSystem;
 },{}],10:[function(require,module,exports){
-// System declaration - will be called in game.
 var PhysicsSystem = function(entities) {
-	// Tag which entity the system belongs to
 	this.entities = entities;
 };
 
-// Declare run() - will be called in game when game is called
+
 PhysicsSystem.prototype.run = function() {
-	// Run the render loop
 	window.setInterval(this.tick.bind(this), 1000/60);
 };
 
-// tick() declaration
-PhysicsSystem.prototype.tick = function() {
-	// Rendering goes here
-	// Go through all the entities
-	for (var i = 0; i < this.entities.length; i++) {
-		var entity = this.entities[i];
-		// Check to see if an entity has graphics component
-		if (!('physics' in entity.components)) {
-			// Skip to the next entity if it doesn't have graphics component
-			continue;
-		}
-		// Call draw() if it has graphics component
-		entity.components.physics.update(1/60);
-	}
-};
+
+		PhysicsSystem.prototype.tick = function() {
+			for (var i = 0; i < this.entities.length; i++) {
+				var entity = this.entities[i];
+				if (!('physics' in entity.components)) {
+					continue;
+				}
+				entity.components.physics.update(1/60);
+			}
+		};
 
 
 exports.PhysicsSystem = PhysicsSystem;
