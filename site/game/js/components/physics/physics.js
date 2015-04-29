@@ -15,7 +15,6 @@ var PhysicsComponent = function(entity) {
 };
 
 		PhysicsComponent.prototype.update = function(delta) {
-			console.log('updating');
 			this.velocity.x += this.acceleration.x * delta;
 			this.velocity.y += this.acceleration.y * delta;
 

@@ -3,21 +3,20 @@
 						  graphics.js
 */
 
-var graphicsComponent  = require('../components/graphics/pipe');
+var graphicsComponent  = require('../components/graphics/ceiling');
 var physicsComponent   = require('../components/physics/physics');
 var collisionComponent = require('../components/collision/rect.js');
 
-var Pipe = function(loc, height) {
+var Ceiling = function(loc, height) {
 	//
-	var graphics = new graphicsComponent.PipeGraphicsComponent(this);
+	var graphics = new graphicsComponent.CeilingGraphicsComponent(this);
 	var physics  = new physicsComponent.PhysicsComponent(this);
-	physics.position.x = 1;
-	physics.position.y = (loc === "upper") ? 1 : 0;
-	physics.acceleration.x -= 0.1;
+	physics.position.x = -1;
+	physics.position.y = 1;
 	//
 	this.size = {
-								x: 0.2,
-								y: height
+								x: 2,
+								y: -0.01
 						 };
 	//
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
@@ -29,4 +28,4 @@ var Pipe = function(loc, height) {
 	};
 };
 
-exports.Pipe = Pipe;
+exports.Ceiling = Ceiling;

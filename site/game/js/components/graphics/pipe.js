@@ -4,10 +4,9 @@ var PipeGraphicsComponent = function(entity) {
 
 		PipeGraphicsComponent.prototype.draw = function(context) {
 			var position = this.entity.components.physics.position,
-					width    = this.entity.width,
-					height   = this.entity.height;
-					//gap      = this.entity.gap,
-					//buffer   = this.entity.buffer,
+					width    = this.entity.size.x,
+					height   = this.entity.size.y;
+			//
 			context.save();
 			context.fillStyle = '#006500';
 		  context.fillRect(position.x, position.y, width, (position.y == 1 ? -height : height));

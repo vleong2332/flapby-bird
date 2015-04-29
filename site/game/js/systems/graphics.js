@@ -1,31 +1,40 @@
+/* Required by game.js --> main.js */
+
 var pipe = require('../entities/pipe');
 
 var GraphicsSystem = function(entities) {
-	// Tag which entity the system belongs to
+	//
 	this.entities = entities;
-	this.canvas = document.getElementById('main-canvas');
-	this.context = this.canvas.getContext('2d');
+	this.canvas   = document.getElementById('main-canvas');
+	this.context  = this.canvas.getContext('2d');
+	//
 	this.createNewPipes = function() {
-		console.log('creating pipes');
-		var gap = Math.random() * (0.5 - 0.2) + 0.2;
-		var buffer = 0.1;
-		var ttlHeight = 1 - buffer - gap;
-		var uprHeight = buffer + (Math.random() * (ttlHeight - buffer) + buffer);
-		var lwrHeight = buffer + (ttlHeight - uprHeight);
+		var minGap    = 0.2,
+				maxGap    = 0.5,
+				gap       = Math.random() * (maxGap - minGap) + minGap,
+				buffer    = 0.1,
+				ttlHeight = 1 - buffer - gap,
+				uprHeight = buffer + (Math.random() * (ttlHeight - buffer) + buffer),
+				lwrHeight = buffer + (ttlHeight - uprHeight);
+		//
 		this.entities.push(new pipe.Pipe('upper', uprHeight));
 		this.entities.push(new pipe.Pipe('lower', lwrHeight));
-		console.log(gap, uprHeight, lwrHeight);
+	};
+	this.deleteAllPipes = function() {
+		// Reset game by deleting all pipes entites and create a new one
+		this.entities.splice(3, this.entities.length);
 	};
 };
 
-
+		// 
 		GraphicsSystem.prototype.run = function() {
 			window.requestAnimationFrame(this.tick.bind(this));
+			// Initial and consequent pipes creation
 			this.createNewPipes();
 			window.setInterval(this.createNewPipes.bind(this), 2000);
 		};
 
-
+		//
 		GraphicsSystem.prototype.tick = function() {
 			if (this.canvas.width != this.canvas.offsetWidth ||
 				this.canvas.height  != this.canvas.offsetHeight) {
@@ -50,5 +59,6 @@ var GraphicsSystem = function(entities) {
 			//
 			window.requestAnimationFrame(this.tick.bind(this));
 		};
+
 
 exports.GraphicsSystem = GraphicsSystem;
