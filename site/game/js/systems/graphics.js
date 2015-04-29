@@ -17,14 +17,22 @@ var GraphicsSystem = function(entities) {
 				uprHeight = buffer + (Math.random() * (ttlHeight - buffer) + buffer),
 				lwrHeight = buffer + (ttlHeight - uprHeight);
 		//
-		this.entities.push(new pipe.Pipe('upper', uprHeight));
-		this.entities.push(new pipe.Pipe('lower', lwrHeight));
+		var upperPipe = new pipe.Pipe('upper', uprHeight),
+				lowerPipe = new pipe.Pipe('lower', lwrHeight);
+		//
+		this.entities.splice(2, 0, upperPipe, lowerPipe);
 	};
 	this.deleteAllPipes = function() {
 		// Reset game by deleting all pipes entites and create a new one
-		this.entities.splice(3, this.entities.length);
+		this.entities.splice(2, (this.entities.length-4));
+	};
+	this.deleteLastTwoPipes = function() {
+		// Remove the last two pipes that gone through the screen
+		this.entities.splice((this.entities.length-4), 2);
+		console.log('Removed two pipes towards the end of entities array');
 	};
 };
+
 
 		// 
 		GraphicsSystem.prototype.run = function() {

@@ -17,7 +17,7 @@ var Pipe = function(loc, height) {
 	//
 	this.size = {
 								x: 0.2,
-								y: height
+								y: 0.25//height
 						 };
 	//
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
@@ -28,5 +28,11 @@ var Pipe = function(loc, height) {
 		collision: collision
 	};
 };
+
+		Pipe.prototype.onCollision = function(entity) {
+			console.log('Pipe collided with entity:', entity);
+			// Remove Pipe
+		};
+
 
 exports.Pipe = Pipe;
