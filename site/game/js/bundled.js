@@ -104,7 +104,7 @@ var Pipe = function(loc, height) {
 	this.width    = 0.2;
 	this.height   = height;
 	//
-	physics.position.x = 1 - this.width;
+	physics.position.x = 1;
 	physics.position.y = (loc === "upper") ? 1 : 0;
 	physics.acceleration.x -= 0.1;
 	//
