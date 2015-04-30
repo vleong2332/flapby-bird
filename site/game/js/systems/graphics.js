@@ -20,11 +20,11 @@ var GraphicsSystem = function(entities) {
 		var upperPipe = new pipe.Pipe('upper', uprHeight),
 				lowerPipe = new pipe.Pipe('lower', lwrHeight);
 		//
-		this.entities.splice(2, 0, upperPipe, lowerPipe);
+		this.entities.splice(3, 0, upperPipe, lowerPipe);
 	};
 	this.deleteAllPipes = function() {
 		// Reset game by deleting all pipes entites and create a new one
-		this.entities.splice(2, (this.entities.length-4));
+		this.entities.splice(3, (this.entities.length-5));
 	};
 	this.deleteLastTwoPipes = function() {
 		// Remove the last two pipes that gone through the screen

@@ -8,7 +8,7 @@ var KeeperGraphicsComponent = function(entity) {
 					height   = this.entity.size.y;
 			//
 			context.save();
-			context.fillStyle = '#00A';
+			context.fillStyle = 'rgba(0,0,0,0)';
 		  context.fillRect(position.x, position.y, width, height);
 		  context.restore();
 		};

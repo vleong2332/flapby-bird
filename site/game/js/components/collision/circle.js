@@ -50,14 +50,18 @@ var CircleCollisionComponent = function(entity, radius) {
 					positionB = entity.components.physics.position,
 					sizeB     = entity.components.collision.size,
 					radiusA   = this.radius;
+			var center = {
+											x: positionB.x + sizeB.x / 2,
+											y: (positionB.y == 1) ? (positionB.y - sizeB.y / 2) : (positionB.y + sizeB.y / 2)
+									 };
 			//
 			var closest = {
 											x: clamp(positionA.x,
-															 positionB.x - (sizeB.x/2),
-															 positionB.x + (sizeB.x/2)),
+															 center.x - (sizeB.x/2),
+															 center.x + (sizeB.x/2)),
 											y: clamp(positionA.y,
-															 positionB.y - (sizeB.y/2),
-															 positionB.y + (sizeB.y/2))
+															 center.y - (sizeB.y/2),
+															 center.y + (sizeB.y/2))
 										};
 			var diff = {
 									 x: positionA.x - closest.x,

@@ -11,7 +11,7 @@ var Keeper = function(loc, height) {
 	//
 	var graphics = new graphicsComponent.KeeperGraphicsComponent(this);
 	var physics  = new physicsComponent.PhysicsComponent(this);
-	physics.position.x = -0.5;
+	physics.position.x = -0.2;
 	physics.position.y = 0;
 	//
 	this.size = {

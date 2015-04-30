@@ -17,7 +17,7 @@ var Pipe = function(loc, height) {
 	//
 	this.size = {
 								x: 0.2,
-								y: 0.25//height
+								y: height
 						 };
 	//
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
