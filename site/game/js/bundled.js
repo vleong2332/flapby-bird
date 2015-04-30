@@ -388,7 +388,7 @@ var Pipe = function(loc, height) {
 	var physics  = new physicsComponent.PhysicsComponent(this);
 	physics.position.x = 1;
 	physics.position.y = (loc === "upper") ? 1 : 0;
-	physics.acceleration.x -= 0.1;
+	physics.velocity.x -= 0.365;
 	//
 	this.size = {
 								x: 0.2,
@@ -488,40 +488,70 @@ var Keeper = function(loc, height) {
 
 exports.Keeper = Keeper;
 },{"../components/collision/rect.js":3,"../components/graphics/scoreKeeper":9,"../components/physics/physics":10}],17:[function(require,module,exports){
-/* Required by main.js */
+//
+// Required by main.js
+//
+var graphicsSystem = require('./systems/graphics'),
+		physicsSystem  = require('./systems/physics'),
+		inputSystem    = require('./systems/input'),
+		bird           = require('./entities/bird'),
+		pipe           = require('./entities/pipe'),
+		ground         = require('./entities/ground'),
+		ceiling        = require('./entities/ceiling'),
+		eater          = require('./entities/pipeEater'),
+		keeper         = require('./entities/scoreKeeper');
 
-var graphicsSystem = require('./systems/graphics');
-var physicsSystem  = require('./systems/physics');
-var inputSystem    = require('./systems/input');
-var bird           = require('./entities/bird');
-var pipe           = require('./entities/pipe');
-var ground         = require('./entities/ground');
-var ceiling        = require('./entities/ceiling');
-var eater          = require('./entities/pipeEater');
-var keeper         = require('./entities/scoreKeeper');
+// FlapbyBird is the main function for the game. It starts and stops the game.
+// FlapbyBird
+//  |_ entities[]
+//  |_ graphics
+//  |_ physics
+//  |_ input
+//  |_ run()
+//  |_ pause() *not implemented
+//  |_ reset() *not implemented
 
 var FlapbyBird = function() {
-	//
-	this.entities = [new eater.Eater(), new keeper.Keeper(), new bird.Bird(), new ground.Ground(), new ceiling.Ceiling()];
+	// Array containing graphical entities on the canvas
+	this.entities = [new eater.Eater(), new keeper.Keeper(), new bird.Bird(),
+									 new ground.Ground(), new ceiling.Ceiling()];
+	// Various system that handle the array
 	this.graphics = new graphicsSystem.GraphicsSystem(this.entities);
 	this.physics  = new physicsSystem.PhysicsSystem(this.entities);
 	this.input    = new inputSystem.InputSystem(this.entities);
 };
 
-		// Run graphics, physics, and input system
+		//
+		// Function: run graphics, physics, and input system
+		//
 		FlapbyBird.prototype.run = function() {
+			// Execute each system's run function
 			this.graphics.run();
 			this.physics.run();
 			this.input.run();
 		};
 
+
 exports.FlapbyBird = FlapbyBird;
 },{"./entities/bird":11,"./entities/ceiling":12,"./entities/ground":13,"./entities/pipe":14,"./entities/pipeEater":15,"./entities/scoreKeeper":16,"./systems/graphics":19,"./systems/input":20,"./systems/physics":21}],18:[function(require,module,exports){
-var graphicsSystem = require ('./graphics');
-var eater          = require ('../entities/pipeEater');
-var pipe          = require ('../entities/pipe');
-var bird          = require ('../entities/bird');
-var keeper        = require ('../entities/scoreKeeper');
+//
+// Required by physics.js --> game.js --> main.js
+//
+var graphicsSystem = require ('./graphics'),
+		eater          = require ('../entities/pipeEater'),
+		pipe           = require ('../entities/pipe'),
+		bird           = require ('../entities/bird'),
+		keeper         = require ('../entities/scoreKeeper');
+
+//
+// CollisionSystem handles the what happens if collision between two entity occurs
+// CollisionSystem(entities)
+//  |_ entities[]
+//  |_ graphicsSystem
+//  |_ points
+//  |_ score
+//  |_ hiScore
+//  |_ tick()
 
 var CollisionSystem = function(entities) {
 	this.entities = entities;
@@ -531,138 +561,201 @@ var CollisionSystem = function(entities) {
 	this.hiScore = 0;
 };
 
+		//
+		// Function: Check for collisions every tick.
+		// This runs right after physics' tick = check for collision after every move
+		//
 		CollisionSystem.prototype.tick = function() {
+			// Goes through each entity in the list
 			for (var i=0; i<this.entities.length; i++) {
 				var entityA = this.entities[i];
+				// Skip to the next if entity doesn't have any components
 				if (!('collision' in entityA.components)) {
 					continue;
 				}
-				//
+				// Goes through the next entities to compare
 				for (var j=i+1; j<this.entities.length; j++) {
 					var entityB = this.entities[j];
-					
+					// Skip to the next if entity doesn't have any components
 					if (!('collision' in entityB.components)) {
 						continue;
 					}
-
-					// Skip to next iteration if no collition is detected
+					// Check for collision between the two entities, skip to the next if none detected
 					if (!entityA.components.collision.collidesWith(entityB)) {
 						continue;
 					}
-
-					// If collision is detected and if entity has a collition handlre
+					// If collision is detected and if entity has a collition handler
 					if (entityA.components.collision.onCollision) {
 						// Call the entity's own collision handler
 						entityA.components.collision.onCollision(entityB);
-
-						// If bird hits anything...
+						
+						// If the entity is a bird...
 						if (entityA instanceof bird.Bird) {
 							// Remove all drawn pipes
 							this.graphicsSystem.deleteAllPipes();
-							// Set high score
-							if (this.score > this.hiScore) this.hiScore = this.score;
 							// Reset score
-							this.score = 0;
+							this.score  = 0;
 							this.points = 0;
-							document.getElementById('score').innerHTML = this.score;
-							document.getElementById('hi-score').innerHTML = this.hiScore;
+							this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
 						}
-
-						// Remove pipes that went out of screen if pipeEater collides with pipe
+					
+						// If pipeEater collides with pipes, delete that pipes
 						if (entityA instanceof eater.Eater && entityB instanceof pipe.Pipe) {
-							console.log (entityA, 'collides with', entityB);
 							this.graphicsSystem.deleteLastTwoPipes();
 						}
-
+						
 						// Update score if scoreKeeper collides with pipe
 						if (entityA instanceof keeper.Keeper && entityB instanceof pipe.Pipe) {
 							this.points++;
 							if (!(this.points % 50)) {
 								this.score++;
-								document.getElementById('score').innerHTML = this.score;
+								this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
 							}
 						}
 					}
-					// If collision is detected and the second entity has 
+					// If collision is detected and the second entity has collision handler...
 					if (entityB.components.collision.onCollision) {
-						// Call the second entity's own collition handler if there is any
+						// Call the second entity's own collition handler
 						entityB.components.collision.onCollision(entityA);
 					}
 				}
 			}
 		};
 
+
 exports.CollisionSystem = CollisionSystem;
 },{"../entities/bird":11,"../entities/pipe":14,"../entities/pipeEater":15,"../entities/scoreKeeper":16,"./graphics":19}],19:[function(require,module,exports){
-/* Required by game.js --> main.js */
-
+//
+//	Required by game.js --> main.js
+//
 var pipe = require('../entities/pipe');
 
+// Graphics System is responsible for putting visuals on the canvas
+// GraphicsSystem(entities)
+//  |_ entities[]
+//  |_ canvas
+//  |_ context
+//  |_ run()
+//  |_ tick()
+//  |_ createNewPipes()
+//  |   |_ minGap
+//  |   |_ maxGap
+//  |   |_ gap
+//  |   |_ buffer
+//  |   |_ ttlHeight
+//  |   |_ uprHeight
+//  |   |_ lwrHeight
+//  |   |_ upperPipe
+//  |   |_ lowerPipe
+//  |_ deleteAllPipes()
+//  |_ deleteLastTwoPipes()
+//  |_ updateScore(score, hiScore)
+
 var GraphicsSystem = function(entities) {
-	//
 	this.entities = entities;
 	this.canvas   = document.getElementById('main-canvas');
 	this.context  = this.canvas.getContext('2d');
-	//
-	this.createNewPipes = function() {
-		var minGap    = 0.2,
-				maxGap    = 0.5,
-				gap       = Math.random() * (maxGap - minGap) + minGap,
-				buffer    = 0.1,
-				ttlHeight = 1 - buffer - gap,
-				uprHeight = buffer + (Math.random() * (ttlHeight - buffer) + buffer),
-				lwrHeight = buffer + (ttlHeight - uprHeight);
-		//
-		var upperPipe = new pipe.Pipe('upper', uprHeight),
-				lowerPipe = new pipe.Pipe('lower', lwrHeight);
-		//
-		this.entities.splice(3, 0, upperPipe, lowerPipe);
-	};
-	this.deleteAllPipes = function() {
-		// Reset game by deleting all pipes entites and create a new one
-		this.entities.splice(3, (this.entities.length-5));
-	};
-	this.deleteLastTwoPipes = function() {
-		// Remove the last two pipes that gone through the screen
-		this.entities.splice((this.entities.length-4), 2);
-		console.log('Removed two pipes towards the end of entities array');
-	};
 };
 
-
+		//
+		// Function: Run the graphics system
 		// 
 		GraphicsSystem.prototype.run = function() {
+			// Execute one tick of GraphicsSystem before the next paint cycle
+			// There are normally 60 paint cycles in 1 second
 			window.requestAnimationFrame(this.tick.bind(this));
-			// Initial and consequent pipes creation
-			this.createNewPipes();
+			// Initial and consequent pipes creations
 			window.setInterval(this.createNewPipes.bind(this), 2000);
 		};
 
 		//
+		// Function: Execute all GraphicsSystem activities in one tick
+		//
 		GraphicsSystem.prototype.tick = function() {
+			// Ensure drawing area is the same as canvas area even when resize
 			if (this.canvas.width != this.canvas.offsetWidth ||
 				this.canvas.height  != this.canvas.offsetHeight) {
 				this.canvas.width  = this.canvas.offsetWidth;
 				this.canvas.height = this.canvas.offsetHeight;
 			}
-			//
+
+			// Reset the canvas at every tick
 			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			// Save a clean state of the canvas
 			this.context.save();
-			this.context.translate(this.canvas.width / 2, this.canvas.height);
+			// Put the origin at the bottom middle
+			this.context.translate(this.canvas.width/2, this.canvas.height);
+			// Flipped the canvas so that y positive points up
+			// and maintain the aspect ratio of the coordinates
 			this.context.scale(this.canvas.height, -this.canvas.height);
-			//
+			
+			// Go through each entity in the list
 			for (var i = 0; i < this.entities.length; i++) {
 				var entity = this.entities[i];
+				// Skip to the next one if there is no graphics component present
 				if (!('graphics' in entity.components)) {
 					continue;
 				}
+				// If there is graphic component, execute it's draw()
 				entity.components.graphics.draw(this.context);
 			}
-			//
+
+			// Restore the canvas to the clean state
 			this.context.restore();
-			//
+			// Execute another tick of GraphicsSystem
+			// This will create an infinite execution since the next one calls the next and that
+			// calls the next and so on
 			window.requestAnimationFrame(this.tick.bind(this));
 		};
+
+		//
+		// Function: Create one pair of pipes with random gap size
+		//
+		GraphicsSystem.prototype.createNewPipes = function() {
+		var minGap    = 0.15, // SETTING
+				maxGap    = 0.45, // SETTING
+				gap       = Math.random() * (maxGap - minGap) + minGap,
+				buffer    = 0.1,
+				ttlHeight = 1 - buffer - gap,
+				uprHeight = buffer + (Math.random() * (ttlHeight - buffer) + buffer),
+				lwrHeight = buffer + (ttlHeight - uprHeight),
+				upperPipe = new pipe.Pipe('upper', uprHeight),
+				lowerPipe = new pipe.Pipe('lower', lwrHeight);
+		// Insert the two pipes into the list of entities starting at the 4th position
+		// The first three entities in the lists are eater, keeper, and bird.
+		this.entities.splice(3, 0, upperPipe, lowerPipe);
+	};
+
+	//
+	// Function: Remove all pipes from the canvas
+	//
+	GraphicsSystem.prototype.deleteAllPipes = function() {
+		// Remove all entities minus 5 starting from the fourth position
+		// The first 3 entities are eater, keeper, and bird
+		// The last 2 entities are ground and ceiling
+		this.entities.splice(3, (this.entities.length-5));
+	};
+
+	//
+	// Function: Remove a pair of pipes
+	//
+	GraphicsSystem.prototype.deleteLastTwoPipes = function() {
+		// Remove the last two pipes in the list of entities
+		this.entities.splice((this.entities.length-4), 2);
+	};
+
+	//
+	// Function: Update scores passed from collision system
+	//
+	GraphicsSystem.prototype.updateScore = function(score, hiScore) {
+		// Set high score
+		if (score > hiScore) hiScore = score;
+		console.log(score > hiScore);
+		// Display scores to the HTML
+		document.getElementById('score').innerHTML    = score;
+		document.getElementById('hi-score').innerHTML = hiScore;
+		return hiScore;
+	};
 
 
 exports.GraphicsSystem = GraphicsSystem;
@@ -692,9 +785,18 @@ var InputSystem = function(entities) {
 
 exports.InputSystem = InputSystem;
 },{}],21:[function(require,module,exports){
-/* Required by game.js --> main.js */
-
+//
+// Required by game.js --> main.js
+//
 var collisionSystem = require('./collision');
+
+//
+// PhysicsSystem updates physics components of entities. It runs in sync with CollisionSystem.
+// PhysicsSystem
+//  |_ entities[]
+//  |_ collisionSystem
+//  |_ run()
+//  |_ tick()
 
 var PhysicsSystem = function(entities) {
 	this.entities = entities;
@@ -702,20 +804,30 @@ var PhysicsSystem = function(entities) {
 };
 
 		//
+		// Function: Run the Physics System
+		//
 		PhysicsSystem.prototype.run = function() {
+			// Make one tick every 1/60 second which results in 60 fps
 			window.setInterval(this.tick.bind(this), 1000/60);
 		};
 
 		//
+		// Function: Execute all PhysicsSystem activities in one tick
+		//
 		PhysicsSystem.prototype.tick = function() {
+			// Go through the list of entity
 			for (var i = 0; i < this.entities.length; i++) {
 				var entity = this.entities[i];
+				// Skip to the next entity if there is no physics component
 				if (!('physics' in entity.components)) {
 					continue;
 				}
+				// If there is physics component, call its update()
 				entity.components.physics.update(1/60);
 			}
-			//
+
+			// Also run the CollisionSystem's tick
+			// This way, both systems are synced
 			this.collisionSystem.tick();
 		};
 

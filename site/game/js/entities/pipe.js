@@ -13,7 +13,7 @@ var Pipe = function(loc, height) {
 	var physics  = new physicsComponent.PhysicsComponent(this);
 	physics.position.x = 1;
 	physics.position.y = (loc === "upper") ? 1 : 0;
-	physics.acceleration.x -= 0.1;
+	physics.velocity.x -= 0.365;
 	//
 	this.size = {
 								x: 0.2,
