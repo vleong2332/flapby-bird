@@ -8,6 +8,7 @@ var pipe           = require('./entities/pipe');
 var ground         = require('./entities/ground');
 var ceiling        = require('./entities/ceiling');
 var eater          = require('./entities/pipeEater');
+var keeper         = require('./entities/scoreKeeper');
 
 var FlapbyBird = function() {
 	//

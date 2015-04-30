@@ -50,6 +50,8 @@ var CircleCollisionComponent = function(entity, radius) {
 					positionB = entity.components.physics.position,
 					sizeB     = entity.components.collision.size,
 					radiusA   = this.radius;
+			positionB.x = sizeB.x / 2;
+			positionB.y = sizeB.y / 2;
 			//
 			var closest = {
 											x: clamp(positionA.x,
