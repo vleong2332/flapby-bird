@@ -12,7 +12,7 @@ var keeper         = require('./entities/scoreKeeper');
 
 var FlapbyBird = function() {
 	//
-	this.entities = [new eater.Eater(), new bird.Bird(), new ground.Ground(), new ceiling.Ceiling()];
+	this.entities = [new eater.Eater(), new keeper.Keeper(), new bird.Bird(), new ground.Ground(), new ceiling.Ceiling()];
 	this.graphics = new graphicsSystem.GraphicsSystem(this.entities);
 	this.physics  = new physicsSystem.PhysicsSystem(this.entities);
 	this.input    = new inputSystem.InputSystem(this.entities);

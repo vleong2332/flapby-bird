@@ -23,16 +23,26 @@ var RectCollisionComponent = function(entity, size) {
 					positionB = entity.components.physics.position,
 					sizeA = this.size,
 					sizeB = entity.components.collision.size;
+
+			var centerA = {
+											x: positionA.x + sizeB.x / 2,
+											y: (positionA.y == 1) ? (positionA.y - sizeA.y / 2) : (positionA.y + sizeA.y / 2)
+									 };
+
+			var centerB = {
+											x: positionB.x + sizeB.x / 2,
+											y: (positionB.y == 1) ? (positionB.y - sizeB.y / 2) : (positionB.y + sizeB.y / 2)
+									 };
+
+			var leftA   = centerA.x - (sizeA.x/2),
+					rightA  = centerA.x + (sizeA.x/2),
+					topA    = centerA.y + (sizeA.y/2),
+					bottomA = centerA.y - (sizeA.y/2);
 			//
-			var leftA   = positionA.x - (sizeA.x/2),
-					rightA  = positionA.x + (sizeA.x/2),
-					topA    = positionA.y + (sizeA.y/2),
-					bottomA = positionA.y - (sizeA.y/2);
-			//
-			var leftB   = positionB.x - (sizeB.x/2),
-					rightB  = positionB.x + (sizeB.x/2),
-					topB    = positionB.y + (sizeB.y/2),
-					bottomB = positionB.y - (sizeB.y/2);
+			var leftB   = centerB.x - (sizeB.x/2),
+					rightB  = centerB.x + (sizeB.x/2),
+					topB    = centerB.y + (sizeB.y/2),
+					bottomB = centerB.y - (sizeB.y/2);
 			//
 			return !(leftA   > rightB || leftB   > rightA ||
 							 bottomA > topB   || bottomB > topA);

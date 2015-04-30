@@ -59,16 +59,18 @@ var CircleCollisionComponent = function(entity, radius) {
 					positionB = entity.components.physics.position,
 					sizeB     = entity.components.collision.size,
 					radiusA   = this.radius;
-			positionB.x = sizeB.x / 2;
-			positionB.y = sizeB.y / 2;
+			var center = {
+											x: positionB.x + sizeB.x / 2,
+											y: (positionB.y == 1) ? (positionB.y - sizeB.y / 2) : (positionB.y + sizeB.y / 2)
+									 };
 			//
 			var closest = {
 											x: clamp(positionA.x,
-															 positionB.x - (sizeB.x/2),
-															 positionB.x + (sizeB.x/2)),
+															 center.x - (sizeB.x/2),
+															 center.x + (sizeB.x/2)),
 											y: clamp(positionA.y,
-															 positionB.y - (sizeB.y/2),
-															 positionB.y + (sizeB.y/2))
+															 center.y - (sizeB.y/2),
+															 center.y + (sizeB.y/2))
 										};
 			var diff = {
 									 x: positionA.x - closest.x,
@@ -108,16 +110,26 @@ var RectCollisionComponent = function(entity, size) {
 					positionB = entity.components.physics.position,
 					sizeA = this.size,
 					sizeB = entity.components.collision.size;
+
+			var centerA = {
+											x: positionA.x + sizeB.x / 2,
+											y: (positionA.y == 1) ? (positionA.y - sizeA.y / 2) : (positionA.y + sizeA.y / 2)
+									 };
+
+			var centerB = {
+											x: positionB.x + sizeB.x / 2,
+											y: (positionB.y == 1) ? (positionB.y - sizeB.y / 2) : (positionB.y + sizeB.y / 2)
+									 };
+
+			var leftA   = centerA.x - (sizeA.x/2),
+					rightA  = centerA.x + (sizeA.x/2),
+					topA    = centerA.y + (sizeA.y/2),
+					bottomA = centerA.y - (sizeA.y/2);
 			//
-			var leftA   = positionA.x - (sizeA.x/2),
-					rightA  = positionA.x + (sizeA.x/2),
-					topA    = positionA.y + (sizeA.y/2),
-					bottomA = positionA.y - (sizeA.y/2);
-			//
-			var leftB   = positionB.x - (sizeB.x/2),
-					rightB  = positionB.x + (sizeB.x/2),
-					topB    = positionB.y + (sizeB.y/2),
-					bottomB = positionB.y - (sizeB.y/2);
+			var leftB   = centerB.x - (sizeB.x/2),
+					rightB  = centerB.x + (sizeB.x/2),
+					topB    = centerB.y + (sizeB.y/2),
+					bottomB = centerB.y - (sizeB.y/2);
 			//
 			return !(leftA   > rightB || leftB   > rightA ||
 							 bottomA > topB   || bottomB > topA);
@@ -161,7 +173,7 @@ var CeilingGraphicsComponent = function(entity) {
 			//
 			context.save();
 			context.fillStyle = '#650000';
-		  context.fillRect(position.x, position.y, width, height);
+		  context.fillRect(position.x, position.y, width, -height);
 		  context.restore();
 		};
 
@@ -228,7 +240,7 @@ var KeeperGraphicsComponent = function(entity) {
 					height   = this.entity.size.y;
 			//
 			context.save();
-			context.fillStyle = '#00A';
+			context.fillStyle = 'rgba(0,0,0,0)';
 		  context.fillRect(position.x, position.y, width, height);
 		  context.restore();
 		};
@@ -315,7 +327,7 @@ var Ceiling = function(loc, height) {
 	//
 	this.size = {
 								x: 2,
-								y: -0.01
+								y: 0.01
 						 };
 	//
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
@@ -451,7 +463,7 @@ var Keeper = function(loc, height) {
 	//
 	var graphics = new graphicsComponent.KeeperGraphicsComponent(this);
 	var physics  = new physicsComponent.PhysicsComponent(this);
-	physics.position.x = -0.5;
+	physics.position.x = -0.2;
 	physics.position.y = 0;
 	//
 	this.size = {
@@ -490,7 +502,7 @@ var keeper         = require('./entities/scoreKeeper');
 
 var FlapbyBird = function() {
 	//
-	this.entities = [new eater.Eater(), new bird.Bird(), new ground.Ground(), new ceiling.Ceiling()];
+	this.entities = [new eater.Eater(), new keeper.Keeper(), new bird.Bird(), new ground.Ground(), new ceiling.Ceiling()];
 	this.graphics = new graphicsSystem.GraphicsSystem(this.entities);
 	this.physics  = new physicsSystem.PhysicsSystem(this.entities);
 	this.input    = new inputSystem.InputSystem(this.entities);
@@ -514,6 +526,7 @@ var keeper        = require ('../entities/scoreKeeper');
 var CollisionSystem = function(entities) {
 	this.entities = entities;
 	this.graphicsSystem = new graphicsSystem.GraphicsSystem(entities);
+	this.points  = 0;
 	this.score   = 0;
 	this.hiScore = 0;
 };
@@ -550,6 +563,9 @@ var CollisionSystem = function(entities) {
 							if (this.score > this.hiScore) this.hiScore = this.score;
 							// Reset score
 							this.score = 0;
+							this.points = 0;
+							document.getElementById('score').innerHTML = this.score;
+							document.getElementById('hi-score').innerHTML = this.hiScore;
 						}
 
 						// Remove pipes that went out of screen if pipeEater collides with pipe
@@ -558,12 +574,16 @@ var CollisionSystem = function(entities) {
 							this.graphicsSystem.deleteLastTwoPipes();
 						}
 
-						// Add score if scoreKeeper collides with pipe
+						// Update score if scoreKeeper collides with pipe
 						if (entityA instanceof keeper.Keeper && entityB instanceof pipe.Pipe) {
-							this.score++;
+							this.points++;
+							if (!(this.points % 50)) {
+								this.score++;
+								document.getElementById('score').innerHTML = this.score;
+							}
 						}
 					}
-					// If collision is detected...
+					// If collision is detected and the second entity has 
 					if (entityB.components.collision.onCollision) {
 						// Call the second entity's own collition handler if there is any
 						entityB.components.collision.onCollision(entityA);
@@ -596,11 +616,11 @@ var GraphicsSystem = function(entities) {
 		var upperPipe = new pipe.Pipe('upper', uprHeight),
 				lowerPipe = new pipe.Pipe('lower', lwrHeight);
 		//
-		this.entities.splice(2, 0, upperPipe, lowerPipe);
+		this.entities.splice(3, 0, upperPipe, lowerPipe);
 	};
 	this.deleteAllPipes = function() {
 		// Reset game by deleting all pipes entites and create a new one
-		this.entities.splice(2, (this.entities.length-4));
+		this.entities.splice(3, (this.entities.length-5));
 	};
 	this.deleteLastTwoPipes = function() {
 		// Remove the last two pipes that gone through the screen
@@ -665,7 +685,7 @@ var InputSystem = function(entities) {
 
 		// Make the bird jump
 		InputSystem.prototype.onClick = function() {
-			var bird = this.entities[1];
+			var bird = this.entities[2];
 			bird.components.physics.velocity.y = 0.6;
 		};
 

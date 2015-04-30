@@ -9,7 +9,7 @@ var CeilingGraphicsComponent = function(entity) {
 			//
 			context.save();
 			context.fillStyle = '#650000';
-		  context.fillRect(position.x, position.y, width, height);
+		  context.fillRect(position.x, position.y, width, -height);
 		  context.restore();
 		};
 

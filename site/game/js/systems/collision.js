@@ -7,6 +7,7 @@ var keeper        = require ('../entities/scoreKeeper');
 var CollisionSystem = function(entities) {
 	this.entities = entities;
 	this.graphicsSystem = new graphicsSystem.GraphicsSystem(entities);
+	this.points  = 0;
 	this.score   = 0;
 	this.hiScore = 0;
 };
@@ -43,6 +44,9 @@ var CollisionSystem = function(entities) {
 							if (this.score > this.hiScore) this.hiScore = this.score;
 							// Reset score
 							this.score = 0;
+							this.points = 0;
+							document.getElementById('score').innerHTML = this.score;
+							document.getElementById('hi-score').innerHTML = this.hiScore;
 						}
 
 						// Remove pipes that went out of screen if pipeEater collides with pipe
@@ -51,12 +55,16 @@ var CollisionSystem = function(entities) {
 							this.graphicsSystem.deleteLastTwoPipes();
 						}
 
-						// Add score if scoreKeeper collides with pipe
+						// Update score if scoreKeeper collides with pipe
 						if (entityA instanceof keeper.Keeper && entityB instanceof pipe.Pipe) {
-							this.score++;
+							this.points++;
+							if (!(this.points % 50)) {
+								this.score++;
+								document.getElementById('score').innerHTML = this.score;
+							}
 						}
 					}
-					// If collision is detected...
+					// If collision is detected and the second entity has 
 					if (entityB.components.collision.onCollision) {
 						// Call the second entity's own collition handler if there is any
 						entityB.components.collision.onCollision(entityA);

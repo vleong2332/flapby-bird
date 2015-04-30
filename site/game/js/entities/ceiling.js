@@ -16,7 +16,7 @@ var Ceiling = function(loc, height) {
 	//
 	this.size = {
 								x: 2,
-								y: -0.01
+								y: 0.01
 						 };
 	//
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);

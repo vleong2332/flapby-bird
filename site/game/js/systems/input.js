@@ -16,7 +16,7 @@ var InputSystem = function(entities) {
 
 		// Make the bird jump
 		InputSystem.prototype.onClick = function() {
-			var bird = this.entities[1];
+			var bird = this.entities[2];
 			bird.components.physics.velocity.y = 0.6;
 		};
 
