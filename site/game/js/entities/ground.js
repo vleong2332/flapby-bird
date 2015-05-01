@@ -1,26 +1,26 @@
-/*
-	Required by game.js --> main.js
-						  graphics.js
-*/
+//
+// Required by game.js --> main.js
+//
+var graphicsComponent  = require('../components/graphics/ground'),
+		physicsComponent   = require('../components/physics/physics'),
+		collisionComponent = require('../components/collision/rect.js');
 
-var graphicsComponent  = require('../components/graphics/ground');
-var physicsComponent   = require('../components/physics/physics');
-var collisionComponent = require('../components/collision/rect.js');
-
-var Ground = function(loc, height) {
-	//
+var Ground = function() {
+	this.size = {
+		x: (document.getElementById('main-canvas').width)/100,
+		y: 0.001
+ 	};
+ 	
+	// Building components
 	var graphics = new graphicsComponent.GroundGraphicsComponent(this);
 	var physics  = new physicsComponent.PhysicsComponent(this);
+	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
+	
+	// Setting components
 	physics.position.x = -1;
 	physics.position.y = 0;
-	//
-	this.size = {
-								x: 2,
-								y: 0.01
-						 };
-	//
-	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
-	//
+
+	// Framing components in one object
 	this.components = {
 		graphics: graphics,
 		physics:  physics,

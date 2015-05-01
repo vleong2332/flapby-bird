@@ -17,7 +17,7 @@ var gulp       = require('gulp'),
 	uglifycss  = require('gulp-uglifycss');
 
 
-gulp.task('default', ['jshint', 'sass', 'watch']);
+gulp.task('default', ['watch']);
 gulp.task('build', ['jshint', 'sass', 'html', 'scripts', 'vendor', 'styles', 'images', 'fonts']);
 
 /* WATCHING */

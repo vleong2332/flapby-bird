@@ -273,25 +273,38 @@ var PhysicsComponent = function(entity) {
 
 exports.PhysicsComponent = PhysicsComponent;
 },{}],11:[function(require,module,exports){
-/*
-	Required by game.js --> main.js 
-*/
+//
+// Required by game.js --> main.js
+//             collision.js
+//
+var graphicsComponent  = require('../components/graphics/bird'),
+		physicsComponent   = require('../components/physics/physics'),
+		collisionComponent = require('../components/collision/circle');
 
-var graphicsComponent  = require('../components/graphics/bird');
-var physicsComponent   = require('../components/physics/physics');
-var collisionComponent = require('../components/collision/circle');
-var graphicsSystem     = require('../systems/graphics');
+//
+// Bird
+//  |_ components{}
+//      |_ radius
+//			|_ components{}
+//      |   |_ graphics
+//      |   |_ physics
+//      |   |_ collision
+//      |_ onCollision(entity)
+//
 
 var Bird = function() {
-	//
+	this.radius = 0.02;
+	// Building up components
 	var graphics  = new graphicsComponent.BirdGraphicsComponent(this);
 	var physics   = new physicsComponent.PhysicsComponent(this);
-	physics.position.y     = 0.5;
-	physics.acceleration.y = -1.75;
-	//
-	var collision = new collisionComponent.CircleCollisionComponent(this, 0.02);
+	var collision = new collisionComponent.CircleCollisionComponent(this, this.radius);
+	physics.position.y     = 0.5; // Starts at the center
+	physics.acceleration.y = -1.75; // Falling rate
+	// Add bird's onCollision event to the collision component
+	// but 'this' will refer to the bird, instead of the component itself
 	collision.onCollision = this.onCollision.bind(this);
-	//
+	
+	// Frame the components
 	this.components = {
 		graphics:  graphics,
 		physics:   physics,
@@ -299,39 +312,52 @@ var Bird = function() {
 	};
 };
 
-		Bird.prototype.onCollision = function(entity) {
-			console.log('Bird collided with entity:', entity);
-			// Reset physics
-			this.components.physics.position.y     = 0.5;
-			this.components.physics.velocity.y     = 0;
-			this.components.physics.acceleration.y = -1.75;
-		};
+	//
+	// Function: Describe what happens when the bird collides with some other entity
+	//
+	Bird.prototype.onCollision = function(entity) {
+		console.log('Bird collided with entity:', entity);
+		// Reset bird's position and acceleration
+		this.components.physics.position.y     = 0.5;
+		this.components.physics.velocity.y     = 0;
+		this.components.physics.acceleration.y = -1.75;
+	};
+
 
 exports.Bird = Bird;
-},{"../components/collision/circle":2,"../components/graphics/bird":4,"../components/physics/physics":10,"../systems/graphics":19}],12:[function(require,module,exports){
-/*
-	Required by game.js --> main.js
-						  graphics.js
-*/
+},{"../components/collision/circle":2,"../components/graphics/bird":4,"../components/physics/physics":10}],12:[function(require,module,exports){
+//
+// Required by game.js --> main.js
+//
+var graphicsComponent  = require('../components/graphics/ceiling'),
+		physicsComponent   = require('../components/physics/physics'),
+		collisionComponent = require('../components/collision/rect.js');
 
-var graphicsComponent  = require('../components/graphics/ceiling');
-var physicsComponent   = require('../components/physics/physics');
-var collisionComponent = require('../components/collision/rect.js');
+//
+// Ceiling
+//  |_ size
+//  |_ components
+//      |_ graphics
+//      |_ physics
+//      |_ collision
+//
 
-var Ceiling = function(loc, height) {
-	//
-	var graphics = new graphicsComponent.CeilingGraphicsComponent(this);
-	var physics  = new physicsComponent.PhysicsComponent(this);
+var Ceiling = function() {
+	this.size = {
+		x: (document.getElementById('main-canvas').width)/100,
+		y: 0.001
+	};
+
+	// Building components
+	var graphics  = new graphicsComponent.CeilingGraphicsComponent(this);
+	var physics   = new physicsComponent.PhysicsComponent(this);
+	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
+	
+	// Setting components
 	physics.position.x = -1;
 	physics.position.y = 1;
-	//
-	this.size = {
-								x: 2,
-								y: 0.01
-						 };
-	//
-	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
-	//
+
+	// Framing components
 	this.components = {
 		graphics: graphics,
 		physics:  physics,
@@ -339,31 +365,32 @@ var Ceiling = function(loc, height) {
 	};
 };
 
+
 exports.Ceiling = Ceiling;
 },{"../components/collision/rect.js":3,"../components/graphics/ceiling":5,"../components/physics/physics":10}],13:[function(require,module,exports){
-/*
-	Required by game.js --> main.js
-						  graphics.js
-*/
+//
+// Required by game.js --> main.js
+//
+var graphicsComponent  = require('../components/graphics/ground'),
+		physicsComponent   = require('../components/physics/physics'),
+		collisionComponent = require('../components/collision/rect.js');
 
-var graphicsComponent  = require('../components/graphics/ground');
-var physicsComponent   = require('../components/physics/physics');
-var collisionComponent = require('../components/collision/rect.js');
-
-var Ground = function(loc, height) {
-	//
+var Ground = function() {
+	this.size = {
+		x: (document.getElementById('main-canvas').width)/100,
+		y: 0.001
+ 	};
+ 	
+	// Building components
 	var graphics = new graphicsComponent.GroundGraphicsComponent(this);
 	var physics  = new physicsComponent.PhysicsComponent(this);
+	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
+	
+	// Setting components
 	physics.position.x = -1;
 	physics.position.y = 0;
-	//
-	this.size = {
-								x: 2,
-								y: 0.01
-						 };
-	//
-	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
-	//
+
+	// Framing components in one object
 	this.components = {
 		graphics: graphics,
 		physics:  physics,
@@ -531,6 +558,13 @@ var FlapbyBird = function() {
 			this.input.run();
 		};
 
+		//
+		// Function:
+		//
+		FlapbyBird.prototype.pause = function() {
+			this.graphics.pause();
+		};
+
 
 exports.FlapbyBird = FlapbyBird;
 },{"./entities/bird":11,"./entities/ceiling":12,"./entities/ground":13,"./entities/pipe":14,"./entities/pipeEater":15,"./entities/scoreKeeper":16,"./systems/graphics":19,"./systems/input":20,"./systems/physics":21}],18:[function(require,module,exports){
@@ -607,7 +641,7 @@ var CollisionSystem = function(entities) {
 						// Update score if scoreKeeper collides with pipe
 						if (entityA instanceof keeper.Keeper && entityB instanceof pipe.Pipe) {
 							this.points++;
-							if (!(this.points % 50)) {
+							if (this.points % 66 === 0) {
 								this.score++;
 								this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
 							}
@@ -650,6 +684,8 @@ var pipe = require('../entities/pipe');
 //  |_ deleteAllPipes()
 //  |_ deleteLastTwoPipes()
 //  |_ updateScore(score, hiScore)
+//  |_ drawGrid(gap, times)
+//
 
 var GraphicsSystem = function(entities) {
 	this.entities = entities;
@@ -657,61 +693,69 @@ var GraphicsSystem = function(entities) {
 	this.context  = this.canvas.getContext('2d');
 };
 
-		//
-		// Function: Run the graphics system
-		// 
-		GraphicsSystem.prototype.run = function() {
-			// Execute one tick of GraphicsSystem before the next paint cycle
-			// There are normally 60 paint cycles in 1 second
-			window.requestAnimationFrame(this.tick.bind(this));
-			// Initial and consequent pipes creations
-			window.setInterval(this.createNewPipes.bind(this), 2000);
-		};
+	//
+	// Function: Run the graphics system
+	// 
+	GraphicsSystem.prototype.run = function() {
+		// Execute one tick of GraphicsSystem before the next paint cycle
+		// There are normally 60 paint cycles in 1 second
+		var animFrame = window.requestAnimationFrame(this.tick.bind(this));
+		// Initial and consequent pipes creations
+		var timer = window.setInterval(this.createNewPipes.bind(this), 2000);
+	};
 
-		//
-		// Function: Execute all GraphicsSystem activities in one tick
-		//
-		GraphicsSystem.prototype.tick = function() {
-			// Ensure drawing area is the same as canvas area even when resize
-			if (this.canvas.width != this.canvas.offsetWidth ||
-				this.canvas.height  != this.canvas.offsetHeight) {
-				this.canvas.width  = this.canvas.offsetWidth;
-				this.canvas.height = this.canvas.offsetHeight;
+	//
+	// Function: Execute all GraphicsSystem activities in one tick
+	//
+	GraphicsSystem.prototype.tick = function() {
+		// Ensure drawing area is the same as canvas area even when resize
+		if (this.canvas.width   != this.canvas.offsetWidth ||
+			  this.canvas.height  != this.canvas.offsetHeight) {
+			this.canvas.width  = this.canvas.offsetWidth;
+			this.canvas.height = this.canvas.offsetHeight;
+		}
+
+		// Reset the canvas at every tick
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		// Save a clean state of the canvas
+		this.context.save();
+		// Put the origin at the bottom middle
+		this.context.translate(this.canvas.width/2, this.canvas.height);
+		// Flipped the canvas so that y positive points up
+		// and maintain the aspect ratio of the coordinates
+		this.context.scale(this.canvas.height, -this.canvas.height);
+		
+		// Dawing grid below the entities
+		// Uncomment to see
+		//this.drawGrid();
+
+		// Go through each entity in the list
+		for (var i = 0; i < this.entities.length; i++) {
+			var entity = this.entities[i];
+			// Skip to the next one if there is no graphics component present
+			if (!('graphics' in entity.components)) {
+				continue;
 			}
+			// If there is graphic component, execute it's draw()
+			entity.components.graphics.draw(this.context);
+		}
 
-			// Reset the canvas at every tick
-			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-			// Save a clean state of the canvas
-			this.context.save();
-			// Put the origin at the bottom middle
-			this.context.translate(this.canvas.width/2, this.canvas.height);
-			// Flipped the canvas so that y positive points up
-			// and maintain the aspect ratio of the coordinates
-			this.context.scale(this.canvas.height, -this.canvas.height);
-			
-			// Go through each entity in the list
-			for (var i = 0; i < this.entities.length; i++) {
-				var entity = this.entities[i];
-				// Skip to the next one if there is no graphics component present
-				if (!('graphics' in entity.components)) {
-					continue;
-				}
-				// If there is graphic component, execute it's draw()
-				entity.components.graphics.draw(this.context);
-			}
+		// Dawing grid on top of the entities
+		// Uncomment to see
+		//this.drawGrid();
 
-			// Restore the canvas to the clean state
-			this.context.restore();
-			// Execute another tick of GraphicsSystem
-			// This will create an infinite execution since the next one calls the next and that
-			// calls the next and so on
-			window.requestAnimationFrame(this.tick.bind(this));
-		};
+		// Restore the canvas to the clean state
+		this.context.restore();
+		// Execute another tick of GraphicsSystem
+		// This will create an infinite execution since the next one calls the next and that
+		// calls the next and so on
+		var animFrame = window.requestAnimationFrame(this.tick.bind(this));
+	};
 
-		//
-		// Function: Create one pair of pipes with random gap size
-		//
-		GraphicsSystem.prototype.createNewPipes = function() {
+	//
+	// Function: Create one pair of pipes with random gap size
+	//
+	GraphicsSystem.prototype.createNewPipes = function() {
 		var minGap    = 0.15, // SETTING
 				maxGap    = 0.45, // SETTING
 				gap       = Math.random() * (maxGap - minGap) + minGap,
@@ -748,19 +792,58 @@ var GraphicsSystem = function(entities) {
 	// Function: Update scores passed from collision system
 	//
 	GraphicsSystem.prototype.updateScore = function(score, hiScore) {
+		console.log("updating score");
 		// Set high score
 		if (score > hiScore) hiScore = score;
-		console.log(score > hiScore);
 		// Display scores to the HTML
 		document.getElementById('score').innerHTML    = score;
 		document.getElementById('hi-score').innerHTML = hiScore;
 		return hiScore;
 	};
 
+	//
+	// Function: Draw grid based on given gap size and how many lines should be drawn
+	//
+	GraphicsSystem.prototype.drawGrid = function(gap, times) {
+		this.gap   = gap   || 0.1;
+		this.times = times || 10;
+		// this.context.save();
+		this.context.lineWidth = 0.001;
+		this.context.beginPath();
+		for (var i = 0; i < (this.gap*this.times); i += this.gap) {
+			// Positive y
+			this.context.moveTo(-this.gap*this.times, i);
+			this.context.lineTo( this.gap*this.times, i);
+			// Negative y
+			this.context.moveTo(-this.gap*this.times, -i);
+			this.context.lineTo( this.gap*this.times, -i);
+			// Positive x
+			this.context.moveTo(i, -this.gap*this.times);
+			this.context.lineTo(i,  this.gap*this.times);
+			// Negative x
+			this.context.moveTo(-i, -this.gap*this.times);
+			this.context.lineTo(-i,  this.gap*this.times);		
+		}
+		this.context.strokeStyle = "#AAA";
+		this.context.stroke();
+		// this.context.restore();
+	};
+
 
 exports.GraphicsSystem = GraphicsSystem;
 },{"../entities/pipe":14}],20:[function(require,module,exports){
-/* Required by game.js --> main.js */
+//
+// Required by game.js --> main.js
+//
+
+//
+// InputSystem handles all events triggered by the user
+// InputSystem(entities)
+//  |_ entities[]
+//  |_ canvas
+//  |_ overlay
+//  |_ run()
+//  |_ flap()
 
 var InputSystem = function(entities) {
 	this.entities = entities;
@@ -768,18 +851,25 @@ var InputSystem = function(entities) {
 	this.overlay  = document.getElementById('overlay');
 };
 
-		// Bind click and touch handler
+		//
+		// Function: Run Input System
+		//
 		InputSystem.prototype.run = function() {
-			this.canvas.addEventListener('click',      this.onClick.bind(this));
-			this.canvas.addEventListener('touchstart', this.onClick.bind(this));
-			this.overlay.addEventListener('click',      this.onClick.bind(this));
-			this.overlay.addEventListener('touchstart', this.onClick.bind(this));
+			// Bind click and touch event handlers to the canvas
+			this.canvas.addEventListener('click',       this.flap.bind(this));
+			this.canvas.addEventListener('touchstart',  this.flap.bind(this));
+			this.overlay.addEventListener('click',      this.flap.bind(this));
+			this.overlay.addEventListener('touchstart', this.flap.bind(this));
 		};
 
-		// Make the bird jump
-		InputSystem.prototype.onClick = function() {
+		//
+		// Function: Executes when user click on canvas
+		//
+		InputSystem.prototype.flap = function() {
+			// Bird is the third entity
 			var bird = this.entities[2];
-			bird.components.physics.velocity.y = 0.6;
+			// Make the bird jumps by changing it's velocity upwards
+			bird.components.physics.velocity.y = 0.6; // SETTING
 		};
 
 

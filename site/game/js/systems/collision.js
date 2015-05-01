@@ -71,7 +71,7 @@ var CollisionSystem = function(entities) {
 						// Update score if scoreKeeper collides with pipe
 						if (entityA instanceof keeper.Keeper && entityB instanceof pipe.Pipe) {
 							this.points++;
-							if (!(this.points % 50)) {
+							if (this.points % 66 === 0) {
 								this.score++;
 								this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
 							}

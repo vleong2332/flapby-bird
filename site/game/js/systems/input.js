@@ -1,4 +1,15 @@
-/* Required by game.js --> main.js */
+//
+// Required by game.js --> main.js
+//
+
+//
+// InputSystem handles all events triggered by the user
+// InputSystem(entities)
+//  |_ entities[]
+//  |_ canvas
+//  |_ overlay
+//  |_ run()
+//  |_ flap()
 
 var InputSystem = function(entities) {
 	this.entities = entities;
@@ -6,18 +17,25 @@ var InputSystem = function(entities) {
 	this.overlay  = document.getElementById('overlay');
 };
 
-		// Bind click and touch handler
+		//
+		// Function: Run Input System
+		//
 		InputSystem.prototype.run = function() {
-			this.canvas.addEventListener('click',      this.onClick.bind(this));
-			this.canvas.addEventListener('touchstart', this.onClick.bind(this));
-			this.overlay.addEventListener('click',      this.onClick.bind(this));
-			this.overlay.addEventListener('touchstart', this.onClick.bind(this));
+			// Bind click and touch event handlers to the canvas
+			this.canvas.addEventListener('click',       this.flap.bind(this));
+			this.canvas.addEventListener('touchstart',  this.flap.bind(this));
+			this.overlay.addEventListener('click',      this.flap.bind(this));
+			this.overlay.addEventListener('touchstart', this.flap.bind(this));
 		};
 
-		// Make the bird jump
-		InputSystem.prototype.onClick = function() {
+		//
+		// Function: Executes when user click on canvas
+		//
+		InputSystem.prototype.flap = function() {
+			// Bird is the third entity
 			var bird = this.entities[2];
-			bird.components.physics.velocity.y = 0.6;
+			// Make the bird jumps by changing it's velocity upwards
+			bird.components.physics.velocity.y = 0.6; // SETTING
 		};
 
 

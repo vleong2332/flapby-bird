@@ -41,5 +41,12 @@ var FlapbyBird = function() {
 			this.input.run();
 		};
 
+		//
+		// Function:
+		//
+		FlapbyBird.prototype.pause = function() {
+			this.graphics.pause();
+		};
+
 
 exports.FlapbyBird = FlapbyBird;
