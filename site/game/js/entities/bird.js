@@ -8,21 +8,23 @@ var graphicsComponent  = require('../components/graphics/bird'),
 
 //
 // Bird
-//  |_ components{}
-//      |_ radius
-//			|_ components{}
-//      |   |_ graphics
-//      |   |_ physics
-//      |   |_ collision
-//      |_ onCollision(entity)
+//  |_ radius
+//	|_ components{}
+//  |   |_ graphics
+//  |   |_ physics
+//  |   |_ collision
+//  |_ onCollision(entity)
 //
 
 var Bird = function() {
 	this.radius = 0.02;
+
 	// Building up components
 	var graphics  = new graphicsComponent.BirdGraphicsComponent(this);
 	var physics   = new physicsComponent.PhysicsComponent(this);
 	var collision = new collisionComponent.CircleCollisionComponent(this, this.radius);
+
+	// Setting components
 	physics.position.y     = 0.5; // Starts at the center
 	physics.acceleration.y = -1.75; // Falling rate
 	// Add bird's onCollision event to the collision component

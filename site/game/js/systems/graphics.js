@@ -1,7 +1,7 @@
 //
 //	Required by game.js --> main.js
 //
-var pipe = require('../entities/pipe');
+var pipe    = require('../entities/pipe');
 
 // Graphics System is responsible for putting visuals on the canvas
 // GraphicsSystem(entities)
@@ -19,17 +19,19 @@ var pipe = require('../entities/pipe');
 //  |   |_ uprHeight
 //  |   |_ lwrHeight
 //  |   |_ upperPipe
-//  |   |_ lowerPipe
+//  |   \_ lowerPipe
 //  |_ deleteAllPipes()
 //  |_ deleteLastTwoPipes()
 //  |_ updateScore(score, hiScore)
-//  |_ drawGrid(gap, times)
+//  \_ drawGrid(gap, times)
 //
 
 var GraphicsSystem = function(entities) {
 	this.entities = entities;
 	this.canvas   = document.getElementById('main-canvas');
 	this.context  = this.canvas.getContext('2d');
+	this.animFrame = 0; // Will contained ID returned by requestAnimationFrame()
+	this.pipeCreation = 0; // Will hold timer for createNewPipes()
 };
 
 	//
@@ -38,9 +40,25 @@ var GraphicsSystem = function(entities) {
 	GraphicsSystem.prototype.run = function() {
 		// Execute one tick of GraphicsSystem before the next paint cycle
 		// There are normally 60 paint cycles in 1 second
-		var animFrame = window.requestAnimationFrame(this.tick.bind(this));
-		// Initial and consequent pipes creations
-		var timer = window.setInterval(this.createNewPipes.bind(this), 2000);
+		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
+		// Create new pipes every 2 seconds
+		this.pipeCreation = new setTimer(this.createNewPipes.bind(this), 2000);
+	};
+
+	//
+	// Function:
+	//
+	GraphicsSystem.prototype.pause = function() {
+		window.cancelAnimationFrame(this.animFrame);
+		this.pipeCreation.pause();
+	};
+
+	//
+	// Function:
+	//
+	GraphicsSystem.prototype.resume = function() {
+		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
+		this.pipeCreation.resume();
 	};
 
 	//
@@ -88,7 +106,7 @@ var GraphicsSystem = function(entities) {
 		// Execute another tick of GraphicsSystem
 		// This will create an infinite execution since the next one calls the next and that
 		// calls the next and so on
-		var animFrame = window.requestAnimationFrame(this.tick.bind(this));
+		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
 	};
 
 	//
@@ -131,7 +149,7 @@ var GraphicsSystem = function(entities) {
 	// Function: Update scores passed from collision system
 	//
 	GraphicsSystem.prototype.updateScore = function(score, hiScore) {
-		console.log("updating score");
+		//console.log("updating score");
 		// Set high score
 		if (score > hiScore) hiScore = score;
 		// Display scores to the HTML
@@ -167,6 +185,8 @@ var GraphicsSystem = function(entities) {
 		this.context.stroke();
 		// this.context.restore();
 	};
+
+
 
 
 exports.GraphicsSystem = GraphicsSystem;

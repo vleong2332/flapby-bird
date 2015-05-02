@@ -1,27 +1,39 @@
-/*
-	Required by game.js --> main.js
-						  graphics.js
-*/
+//
+//	Required by game.js --> main.js
+//              collision.js
+//
+var graphicsComponent  = require('../components/graphics/pipeEater'),
+		physicsComponent   = require('../components/physics/physics'),
+		collisionComponent = require('../components/collision/rect.js');
 
-var graphicsComponent  = require('../components/graphics/pipeEater');
-var physicsComponent   = require('../components/physics/physics');
-var collisionComponent = require('../components/collision/rect.js');
+//
+// When pipes collide with Eater, graphicsSystem.deleteLastTwoPipes() is triggered
+// Eater
+//  |_ size{}
+//  |   |_ x
+//  |   \_ y
+//  \_ components{}
+//      |_ graphics
+//      |_ physics
+//      \_ collision
+//
 
 var Eater = function(loc, height) {
-	//
-	var graphics = new graphicsComponent.EaterGraphicsComponent(this);
-	var physics  = new physicsComponent.PhysicsComponent(this);
+	this.size = {
+		x: 0.0001,
+		y: 1
+ 	};
+
+	// Building components
+	var graphics  = new graphicsComponent.EaterGraphicsComponent(this);
+	var physics   = new physicsComponent.PhysicsComponent(this);
+	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
+
+	// Configuring components
 	physics.position.x = -1.5;
 	physics.position.y = 0;
-	//
-	this.size = {
-								x: 0.001,
-								y: 1
-						 };
-	//
-	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
-	collision.onCollision = this.onCollision.bind(this);
-	//
+
+	// Packaging components
 	this.components = {
 		graphics:  graphics,
 		physics:   physics,
@@ -29,9 +41,5 @@ var Eater = function(loc, height) {
 	};
 };
 
-
-		Eater.prototype.onCollision = function(entity) {
-			// Remove Pipe
-		};
 
 exports.Eater = Eater;

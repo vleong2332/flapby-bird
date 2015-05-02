@@ -7,8 +7,10 @@ var graphicsComponent  = require('../components/graphics/ceiling'),
 
 //
 // Ceiling
-//  |_ size
-//  |_ components
+//  |_ size{}
+//  |   |_ x
+//  |   |_ y
+//  |_ components{}
 //      |_ graphics
 //      |_ physics
 //      |_ collision

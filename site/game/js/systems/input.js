@@ -9,7 +9,7 @@
 //  |_ canvas
 //  |_ overlay
 //  |_ run()
-//  |_ flap()
+//  \_ flap()
 
 var InputSystem = function(entities) {
 	this.entities = entities;

@@ -14,6 +14,7 @@ var collisionSystem = require('./collision');
 var PhysicsSystem = function(entities) {
 	this.entities = entities;
 	this.collisionSystem = new collisionSystem.CollisionSystem(entities);
+	this.physicsTick = 0;
 };
 
 		//
@@ -21,7 +22,21 @@ var PhysicsSystem = function(entities) {
 		//
 		PhysicsSystem.prototype.run = function() {
 			// Make one tick every 1/60 second which results in 60 fps
-			window.setInterval(this.tick.bind(this), 1000/60);
+			this.physicsTick = new setTimer(this.tick.bind(this), 1000/60);
+		};
+
+		//
+		//
+		//
+		PhysicsSystem.prototype.pause = function() {
+			this.physicsTick.pause();
+		};
+
+		//
+		//
+		//
+		PhysicsSystem.prototype.resume = function() {
+			this.physicsTick.resume();
 		};
 
 		//

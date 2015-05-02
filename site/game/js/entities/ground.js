@@ -5,6 +5,17 @@ var graphicsComponent  = require('../components/graphics/ground'),
 		physicsComponent   = require('../components/physics/physics'),
 		collisionComponent = require('../components/collision/rect.js');
 
+//
+// Ground
+//  |_ size{}
+//  |   |_ x
+//  |   |_ y
+//  |_ components{}
+//      |_ graphics
+//      |_ physics
+//      |_ collision
+//
+
 var Ground = function() {
 	this.size = {
 		x: (document.getElementById('main-canvas').width)/100,
@@ -18,7 +29,7 @@ var Ground = function() {
 	
 	// Setting components
 	physics.position.x = -1;
-	physics.position.y = 0;
+	physics.position.y =  0;
 
 	// Framing components in one object
 	this.components = {
@@ -27,5 +38,6 @@ var Ground = function() {
 		collision: collision
 	};
 };
+
 
 exports.Ground = Ground;

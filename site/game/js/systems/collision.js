@@ -15,7 +15,7 @@ var graphicsSystem = require ('./graphics'),
 //  |_ points
 //  |_ score
 //  |_ hiScore
-//  |_ tick()
+//  \_ tick()
 
 var CollisionSystem = function(entities) {
 	this.entities = entities;
@@ -53,15 +53,15 @@ var CollisionSystem = function(entities) {
 						// Call the entity's own collision handler
 						entityA.components.collision.onCollision(entityB);
 						
-						// If the entity is a bird...
-						if (entityA instanceof bird.Bird) {
-							// Remove all drawn pipes
-							this.graphicsSystem.deleteAllPipes();
-							// Reset score
-							this.score  = 0;
-							this.points = 0;
-							this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
-						}
+						// // If the entity is a bird...
+						// if (entityA instanceof bird.Bird) {
+						// 	// Remove all drawn pipes
+						// 	this.graphicsSystem.deleteAllPipes();
+						// 	// Reset score
+						// 	this.score  = 0;
+						// 	this.points = 0;
+						// 	this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
+						// }
 					
 						// If pipeEater collides with pipes, delete that pipes
 						if (entityA instanceof eater.Eater && entityB instanceof pipe.Pipe) {
@@ -71,6 +71,7 @@ var CollisionSystem = function(entities) {
 						// Update score if scoreKeeper collides with pipe
 						if (entityA instanceof keeper.Keeper && entityB instanceof pipe.Pipe) {
 							this.points++;
+							//console.log(this.points);
 							if (this.points % 66 === 0) {
 								this.score++;
 								this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
