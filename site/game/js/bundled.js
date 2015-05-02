@@ -4,17 +4,19 @@ var flapbyBird = require('./game');
 // Run Flapby Bird game when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
 	var app = new flapbyBird.FlapbyBird();
-	app.run();
+	app.init();
+
+	//
+	var playInstruction = document.getElementById('play-instruction');
+	playInstruction.addEventListener('click', function() {
+		app.run();
+	});
 
 	// Bind space key to pause and resume the game
 	document.addEventListener('keydown', function(event) {
 		if (event.keyCode == 32) {
-			if (app.state == 1) {
-				app.pause();
-			}
-			else if (app.state == 2) {
-				app.resume();
-			}
+			if (app.state == 1) {app.pause();}
+			else if (app.state == 2) {app.resume();}
 		}
 	});
 
@@ -726,34 +728,42 @@ var FlapbyBird = function() {
 	this.input    = new inputSystem.InputSystem(this.entities);
 };
 
-		//
-		// Function: run graphics, physics, and input system
-		//
-		FlapbyBird.prototype.run = function() {
-			// Execute each system's run function
-			this.graphics.run();
-			this.physics.run();
-			this.input.run();
-			this.state = 1;
-		};
+	//
+	//
+	//
+	FlapbyBird.prototype.init = function() {
+		this.graphics.init();
+		this.state = 0;
+	};
 
-		//
-		// Function:
-		//
-		FlapbyBird.prototype.pause = function() {
-			this.graphics.pause();
-			this.physics.pause();
-			this.state = 2;
-		};
+	//
+	// Function: run graphics, physics, and input system
+	//
+	FlapbyBird.prototype.run = function() {
+		// Execute each system's run function
+		this.graphics.run();
+		this.physics.run();
+		this.input.run();
+		this.state = 1;
+	};
 
-		//
-		// Function:
-		//
-		FlapbyBird.prototype.resume = function() {
-			this.graphics.run();
-			this.physics.resume();
-			this.state = 1;
-		};
+	//
+	// Function:
+	//
+	FlapbyBird.prototype.pause = function() {
+		this.graphics.pause();
+		this.physics.pause();
+		this.state = 2;
+	};
+
+	//
+	// Function:
+	//
+	FlapbyBird.prototype.resume = function() {
+		this.graphics.run();
+		this.physics.resume();
+		this.state = 1;
+	};
 
 
 exports.FlapbyBird = FlapbyBird;
@@ -890,6 +900,14 @@ var GraphicsSystem = function(entities) {
 };
 
 	//
+	// Function: Initialize the first tick
+	//
+	GraphicsSystem.prototype.init = function() {
+		this.tick.bind(this);
+		this.tick(1); // Indicate initialization. Only run tick one time.
+	};
+
+	//
 	// Function: Run the graphics system
 	// 
 	GraphicsSystem.prototype.run = function() {
@@ -897,6 +915,7 @@ var GraphicsSystem = function(entities) {
 		// There are normally 60 paint cycles in 1 second
 		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
 		document.getElementById('pause-overlay').className = "hidden";
+		document.getElementById('play-instruction').className = "hidden";
 	};
 
 	//
@@ -910,7 +929,7 @@ var GraphicsSystem = function(entities) {
 	//
 	// Function: Execute all GraphicsSystem activities in one tick
 	//
-	GraphicsSystem.prototype.tick = function() {
+	GraphicsSystem.prototype.tick = function(init) {
 		// Ensure drawing area is the same as canvas area even when resize
 		if (this.canvas.width   != this.canvas.offsetWidth ||
 			  this.canvas.height  != this.canvas.offsetHeight) {
@@ -958,7 +977,10 @@ var GraphicsSystem = function(entities) {
 		// Execute another tick of GraphicsSystem
 		// This will create an infinite execution since the next one calls the next and that
 		// calls the next and so on
-		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
+		// If it's initial tick, don't recall this function
+		if (init != 1) {
+			this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
+		}
 	};
 
 	//

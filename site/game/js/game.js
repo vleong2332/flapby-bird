@@ -32,34 +32,42 @@ var FlapbyBird = function() {
 	this.input    = new inputSystem.InputSystem(this.entities);
 };
 
-		//
-		// Function: run graphics, physics, and input system
-		//
-		FlapbyBird.prototype.run = function() {
-			// Execute each system's run function
-			this.graphics.run();
-			this.physics.run();
-			this.input.run();
-			this.state = 1;
-		};
+	//
+	//
+	//
+	FlapbyBird.prototype.init = function() {
+		this.graphics.init();
+		this.state = 0;
+	};
 
-		//
-		// Function:
-		//
-		FlapbyBird.prototype.pause = function() {
-			this.graphics.pause();
-			this.physics.pause();
-			this.state = 2;
-		};
+	//
+	// Function: run graphics, physics, and input system
+	//
+	FlapbyBird.prototype.run = function() {
+		// Execute each system's run function
+		this.graphics.run();
+		this.physics.run();
+		this.input.run();
+		this.state = 1;
+	};
 
-		//
-		// Function:
-		//
-		FlapbyBird.prototype.resume = function() {
-			this.graphics.run();
-			this.physics.resume();
-			this.state = 1;
-		};
+	//
+	// Function:
+	//
+	FlapbyBird.prototype.pause = function() {
+		this.graphics.pause();
+		this.physics.pause();
+		this.state = 2;
+	};
+
+	//
+	// Function:
+	//
+	FlapbyBird.prototype.resume = function() {
+		this.graphics.run();
+		this.physics.resume();
+		this.state = 1;
+	};
 
 
 exports.FlapbyBird = FlapbyBird;

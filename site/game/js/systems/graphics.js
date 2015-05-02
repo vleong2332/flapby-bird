@@ -38,6 +38,14 @@ var GraphicsSystem = function(entities) {
 };
 
 	//
+	// Function: Initialize the first tick
+	//
+	GraphicsSystem.prototype.init = function() {
+		this.tick.bind(this);
+		this.tick(1); // Indicate initialization. Only run tick one time.
+	};
+
+	//
 	// Function: Run the graphics system
 	// 
 	GraphicsSystem.prototype.run = function() {
@@ -45,6 +53,7 @@ var GraphicsSystem = function(entities) {
 		// There are normally 60 paint cycles in 1 second
 		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
 		document.getElementById('pause-overlay').className = "hidden";
+		document.getElementById('play-instruction').className = "hidden";
 	};
 
 	//
@@ -58,7 +67,7 @@ var GraphicsSystem = function(entities) {
 	//
 	// Function: Execute all GraphicsSystem activities in one tick
 	//
-	GraphicsSystem.prototype.tick = function() {
+	GraphicsSystem.prototype.tick = function(init) {
 		// Ensure drawing area is the same as canvas area even when resize
 		if (this.canvas.width   != this.canvas.offsetWidth ||
 			  this.canvas.height  != this.canvas.offsetHeight) {
@@ -106,7 +115,10 @@ var GraphicsSystem = function(entities) {
 		// Execute another tick of GraphicsSystem
 		// This will create an infinite execution since the next one calls the next and that
 		// calls the next and so on
-		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
+		// If it's initial tick, don't recall this function
+		if (init != 1) {
+			this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
+		}
 	};
 
 	//
