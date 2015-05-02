@@ -17,6 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
 			}
 		}
 	});
+
+	//
+	var continueButton = document.getElementById('continue');
+	continueButton.addEventListener('click', function() {
+		app.resume();
+	});
+
 });
 },{"./game":17}],2:[function(require,module,exports){
 //
@@ -889,6 +896,7 @@ var GraphicsSystem = function(entities) {
 		// Execute one tick of GraphicsSystem before the next paint cycle
 		// There are normally 60 paint cycles in 1 second
 		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
+		document.getElementById('pause-overlay').className = "hidden";
 	};
 
 	//
@@ -896,15 +904,13 @@ var GraphicsSystem = function(entities) {
 	//
 	GraphicsSystem.prototype.pause = function() {
 		window.cancelAnimationFrame(this.animFrame);
+		document.getElementById('pause-overlay').className = "";
 	};
 
 	//
 	// Function: Execute all GraphicsSystem activities in one tick
 	//
 	GraphicsSystem.prototype.tick = function() {
-		console.log('canvas.width: ', this.canvas.width, this.canvas.height);
-		console.log('canvas.offset: ', this.canvas.offsetWidth, this.canvas.offsetHeight);
-		console.log('inner window: ', window.innerWidth, window.innerHeight);
 		// Ensure drawing area is the same as canvas area even when resize
 		if (this.canvas.width   != this.canvas.offsetWidth ||
 			  this.canvas.height  != this.canvas.offsetHeight) {

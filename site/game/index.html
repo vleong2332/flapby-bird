@@ -22,9 +22,20 @@
         <canvas id="main-canvas">
         </canvas>
         <div id="overlay">
-            High-score: <span id="hi-score">0</span>
-            <br />
-            Score: <span id="score">0</span>
+            <div id="scores">
+                High-score: <span id="hi-score">0</span>
+                <br />
+                Score: <span id="score">0</span>
+            </div>
+            <div id="pause-overlay" class="hidden">
+                <div id="pause-content">
+                    <p>Game Paused</p>
+                    <button id="continue" type="button">Continue</button>
+                </div>
+            </div>
+            <div id="instructions">
+                <p>Press "Space" to pause</p>
+            </div>
         </div>
         
         <link rel="stylesheet" href="css/main.css">  
