@@ -18,11 +18,11 @@ var graphicsSystem = require('./systems/graphics'),
 //  |_ physics
 //  |_ input
 //  |_ run()
-//  |_ pause() *not implemented
-//  \_ reset() *not implemented
+//  |_ pause()
+//  \_ resume()
 
 var FlapbyBird = function() {
-	this.state = 0; // 0-idle, 1-running, 2-paused, 3-resumed
+	this.state = 0; // 0-idle, 1-running, 2-paused
 	// Array containing graphical entities on the canvas
 	this.entities = [new eater.Eater(), new keeper.Keeper(), new bird.Bird(),
 									 new ground.Ground(), new ceiling.Ceiling()];
@@ -41,14 +41,12 @@ var FlapbyBird = function() {
 			this.physics.run();
 			this.input.run();
 			this.state = 1;
-			console.log('state: ', this.state);
 		};
 
 		//
 		// Function:
 		//
 		FlapbyBird.prototype.pause = function() {
-			if (this.state != 1 && this.state != 3) return;
 			this.graphics.pause();
 			this.physics.pause();
 			this.state = 2;
@@ -58,10 +56,9 @@ var FlapbyBird = function() {
 		// Function:
 		//
 		FlapbyBird.prototype.resume = function() {
-			if (this.state != 2) return;
-			this.graphics.resume();
+			this.graphics.run();
 			this.physics.resume();
-			this.state = 3;
+			this.state = 1;
 		};
 
 

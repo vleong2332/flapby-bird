@@ -6,94 +6,116 @@ document.addEventListener('DOMContentLoaded', function() {
 	var app = new flapbyBird.FlapbyBird();
 	app.run();
 
+	// Bind space key to pause and resume the game
 	document.addEventListener('keydown', function(event) {
 		if (event.keyCode == 32) {
-			if (app.state == 1 || app.state == 3)
+			if (app.state == 1) {
 				app.pause();
-			else if (app.state == 2)
+			}
+			else if (app.state == 2) {
 				app.resume();
+			}
 		}
 	});
 });
 },{"./game":17}],2:[function(require,module,exports){
+//
+// CircleCollisionComponent
+//  |_ entity
+//  |_ radius
+//  |_ type
+//  |_ collidesWith
+//  |_ collideCircle
+//  \_ collideRect
+//
+
 var CircleCollisionComponent = function(entity, radius) {
 	this.entity = entity;
 	this.radius = radius;
 	this.type   = 'circle';
 };
 
+	//
+	// Function: Check for collision based on type of entities
+	//
+	CircleCollisionComponent.prototype.collidesWith = function(entity) {
+		if (entity.components.collision.type == 'circle') {
+			return this.collideCircle(entity);
+		}
+		else if (entity.components.collision.type == 'rect') {
+			return this.collideRect(entity);
+		}
+		return false;
+	};
 
-		CircleCollisionComponent.prototype.collidesWith = function(entity) {
-			if (entity.components.collision.type == 'circle') {
-				return this.collideCircle(entity);
-			}
-			else if (entity.components.collision.type == 'rect') {
-				return this.collideRect(entity);
-			}
-			return false;
-		};
-
+	//
+	// Function: Handles circle-circle collision
+	//
+	CircleCollisionComponent.prototype.collideCircle = function (entity) {
+		var positionA = this.entity.components.physics.position, // This circle object
+				positionB = entity.components.physics.position, // The other circle object
+				diff      = {
+					x: positionA.x - positionB.x,
+					y: positionA.y - positionB.y
+				};
 		//
-		CircleCollisionComponent.prototype.collideCircle = function (entity) {
-			var positionA = this.entity.components.physics.position, // This circle object
-					positionB = entity.components.physics.position, // The other circle object
-					diff      = {
-												x: positionA.x - positionB.x,
-												y: positionA.y - positionB.y
-											};
-			//
-			var radiusA   = this.radius,
-					radisuB   = entity.components.collision.radius,
-					radiusSum = radiusA + radiusB;
-					
-			//
-			var distanceSquared = diff.x*diff.x + diff.y*diff.y;
-			//
-			return (distanceSquared < radiusSum*radiusSum);
-		};
-
+		var radiusA   = this.radius,
+				radisuB   = entity.components.collision.radius,
+				radiusSum = radiusA + radiusB;				
 		//
-		CircleCollisionComponent.prototype.collideRect = function (entity) {
-			var clamp = function(val, lo, hi) {
-				if (val < lo) {
-					return lo;
-				}
-				if (val > hi) {
-					return hi;
-				}
-				return val;
-			};
-			//
-			var positionA = this.entity.components.physics.position,
-					positionB = entity.components.physics.position,
-					sizeB     = entity.components.collision.size,
-					radiusA   = this.radius;
-			var center = {
-											x: positionB.x + sizeB.x / 2,
-											y: (positionB.y == 1) ? (positionB.y - sizeB.y / 2) : (positionB.y + sizeB.y / 2)
-									 };
-			//
-			var closest = {
-											x: clamp(positionA.x,
-															 center.x - (sizeB.x/2),
-															 center.x + (sizeB.x/2)),
-											y: clamp(positionA.y,
-															 center.y - (sizeB.y/2),
-															 center.y + (sizeB.y/2))
-										};
-			var diff = {
-									 x: positionA.x - closest.x,
-									 y: positionA.y - closest.y
-								 };
-			//
-			var distanceSquared = diff.x*diff.x + diff.y*diff.y;
-			//
-			return distanceSquared < radiusA*radiusA;
+		var distanceSquared = diff.x*diff.x + diff.y*diff.y;
+		
+		return (distanceSquared < radiusSum*radiusSum);
+	};
+
+	//
+	// Function: Handles circle-rectangle collision
+	//
+	CircleCollisionComponent.prototype.collideRect = function (entity) {
+		var positionA = this.entity.components.physics.position,
+				positionB = entity.components.physics.position,
+				sizeB     = entity.components.collision.size,
+				radiusA   = this.radius;
+		var centerB = {
+			x: positionB.x + sizeB.x / 2,
+			y: (positionB.y == 1) ? (positionB.y - sizeB.y / 2) : (positionB.y + sizeB.y / 2)
 		};
+		var clamp = function(val, lo, hi) {
+			if (val < lo) {return lo;}
+			if (val > hi) {return hi;}
+			return val;
+		};
+		var closest = {
+			x: clamp(positionA.x,
+							 centerB.x - (sizeB.x/2),
+							 centerB.x + (sizeB.x/2)),
+			y: clamp(positionA.y,
+							 centerB.y - (sizeB.y/2),
+							 centerB.y + (sizeB.y/2))
+		};
+		var diff = {
+								 x: positionA.x - closest.x,
+								 y: positionA.y - closest.y
+							 };
+		
+		var distanceSquared = diff.x*diff.x + diff.y*diff.y;
+		
+		return distanceSquared < radiusA*radiusA;
+	};
 
 
-	exports.CircleCollisionComponent = CircleCollisionComponent;
+exports.CircleCollisionComponent = CircleCollisionComponent;
 },{}],3:[function(require,module,exports){
+//
+// RectCollisionComponent
+//  |_ entity
+//  |_ size
+//  |_ type
+//  |_ collidesWith
+//  |_ collideCircle
+//  \_ collideRect
+//
+
 var RectCollisionComponent = function(entity, size) {
 	this.entity = entity;
 	this.size   = size;
@@ -114,103 +136,135 @@ var RectCollisionComponent = function(entity, size) {
 	};
 
 	//
-	// Function: 
+	// Function: Handles rectangle-circle collision
 	//
 	RectCollisionComponent.prototype.collideCircle = function(entity) {
+		// Let the circle handles the collision
 		return entity.components.collision.collideRect(this.entity);
 	};
 
-		RectCollisionComponent.prototype.collideRect = function (entity) {
-			var positionA = this.entity.components.physics.position,
-					positionB = entity.components.physics.position,
-					sizeA = this.size,
-					sizeB = entity.components.collision.size;
-
-			var centerA = {
-											x: positionA.x + sizeB.x / 2,
-											y: (positionA.y == 1) ? (positionA.y - sizeA.y / 2) : (positionA.y + sizeA.y / 2)
-									 };
-
-			var centerB = {
-											x: positionB.x + sizeB.x / 2,
-											y: (positionB.y == 1) ? (positionB.y - sizeB.y / 2) : (positionB.y + sizeB.y / 2)
-									 };
-
-			var leftA   = centerA.x - (sizeA.x/2),
-					rightA  = centerA.x + (sizeA.x/2),
-					topA    = centerA.y + (sizeA.y/2),
-					bottomA = centerA.y - (sizeA.y/2);
-			//
-			var leftB   = centerB.x - (sizeB.x/2),
-					rightB  = centerB.x + (sizeB.x/2),
-					topB    = centerB.y + (sizeB.y/2),
-					bottomB = centerB.y - (sizeB.y/2);
-			//
-			return !(leftA   > rightB || leftB   > rightA ||
-							 bottomA > topB   || bottomB > topA);
-		};
+	//
+	// Function: Handles rectangle-rectangle collision
+	//
+	RectCollisionComponent.prototype.collideRect = function (entity) {
+		var positionA = this.entity.components.physics.position,
+				positionB = entity.components.physics.position,
+				sizeA = this.size,
+				sizeB = entity.components.collision.size;
+		//		
+		var centerA = {
+					x: positionA.x + sizeB.x / 2,
+					y: (positionA.y == 1) ? (positionA.y - sizeA.y / 2) : (positionA.y + sizeA.y / 2)
+				},
+				centerB = {
+					x: positionB.x + sizeB.x / 2,
+					y: (positionB.y == 1) ? (positionB.y - sizeB.y / 2) : (positionB.y + sizeB.y / 2)
+				};
+		//
+		var leftA   = centerA.x - (sizeA.x/2),
+				rightA  = centerA.x + (sizeA.x/2),
+				topA    = centerA.y + (sizeA.y/2),
+				bottomA = centerA.y - (sizeA.y/2),
+				leftB   = centerB.x - (sizeB.x/2),
+				rightB  = centerB.x + (sizeB.x/2),
+				topB    = centerB.y + (sizeB.y/2),
+				bottomB = centerB.y - (sizeB.y/2);
+		//
+		return !(leftA   > rightB || leftB   > rightA ||
+						 bottomA > topB   || bottomB > topA);
+	};
 
 
 exports.RectCollisionComponent = RectCollisionComponent;
 },{}],4:[function(require,module,exports){
-// Component declaration
-// Will initialized when created in entity
+//
+// BirdGraphicsComponent
+//  |_ entity
+//  \_ draw()
+//
+
 var BirdGraphicsComponent = function(entity) {
-    // Tag which entity this component belongs to
     this.entity = entity;
 };
 
-// Declare draw()
-// Will be called by systems
-// Access syntax: (BirdGraphicsComponent).draw()
-BirdGraphicsComponent.prototype.draw = function(context) {
-    var position = this.entity.components.physics.position;
+    //
+    // Function: Draw a circle on canvas
+    //
+    BirdGraphicsComponent.prototype.draw = function(context) {
+        var position = this.entity.components.physics.position;
 
-    context.save();
-    context.translate(position.x, position.y);
-    context.beginPath();
-    context.arc(0, 0, 0.02, 0, 2 * Math.PI);
-    context.fill();
-    context.closePath();
-    context.restore();
-};
+        context.save();
+        context.translate(position.x, position.y);
+        context.beginPath();
+        context.arc(0, 0, 0.02, 0, 2 * Math.PI);
+        context.fill();
+        context.closePath();
+        context.restore();
+    };
+
 
 exports.BirdGraphicsComponent = BirdGraphicsComponent;
 },{}],5:[function(require,module,exports){
+//
+// CeilingGraphicsComponent
+//  |_ entity
+//  \_ draw()
+//
+
 var CeilingGraphicsComponent = function(entity) {
 	this.entity = entity;
 };
 
-		CeilingGraphicsComponent.prototype.draw = function(context) {
-			var position = this.entity.components.physics.position,
-					width    = this.entity.size.x,
-					height   = this.entity.size.y;
-			//
-			context.save();
-			context.fillStyle = '#650000';
-		  context.fillRect(position.x, position.y, width, -height);
-		  context.restore();
-		};
+	//
+	// Function: Draw rectangle on canvas
+	//
+	CeilingGraphicsComponent.prototype.draw = function(context) {
+		var position = this.entity.components.physics.position,
+				width    = this.entity.size.x,
+				height   = this.entity.size.y;
+		//
+		context.save();
+		context.fillStyle = '#650000';
+	  context.fillRect(position.x, position.y, width, -height);
+	  context.restore();
+	};
+
 
 exports.CeilingGraphicsComponent = CeilingGraphicsComponent;
 },{}],6:[function(require,module,exports){
+//
+// GroundGraphicsComponent
+//  |_ entity
+//  \_ draw()
+//
+
 var GroundGraphicsComponent = function(entity) {
 	this.entity = entity;
 };
 
-		GroundGraphicsComponent.prototype.draw = function(context) {
-			var position = this.entity.components.physics.position,
-					width    = this.entity.size.x,
-					height   = this.entity.size.y;
-			//
-			context.save();
-			context.fillStyle = '#000';
-		  context.fillRect(position.x, position.y, width, height);
-		  context.restore();
-		};
+	//
+	// Function: Draw rectangle on canvas
+	//
+	GroundGraphicsComponent.prototype.draw = function(context) {
+		var position = this.entity.components.physics.position,
+				width    = this.entity.size.x,
+				height   = this.entity.size.y;
+		//
+		context.save();
+		context.fillStyle = '#000';
+	  context.fillRect(position.x, position.y, width, height);
+	  context.restore();
+	};
+
 
 exports.GroundGraphicsComponent = GroundGraphicsComponent;
 },{}],7:[function(require,module,exports){
+//
+// PipeGraphicsComponent
+//  |_ entity
+//  \_ draw()
+//
+
 var PipeGraphicsComponent = function(entity) {
 	this.entity = entity;
 };
@@ -228,37 +282,57 @@ var PipeGraphicsComponent = function(entity) {
 
 exports.PipeGraphicsComponent = PipeGraphicsComponent;
 },{}],8:[function(require,module,exports){
+//
+// EaterGraphicsComponent
+//  |_ entity
+//  \_ draw()
+//
+
 var EaterGraphicsComponent = function(entity) {
 	this.entity = entity;
 };
 
-		EaterGraphicsComponent.prototype.draw = function(context) {
-			var position = this.entity.components.physics.position,
-					width    = this.entity.size.x,
-					height   = this.entity.size.y;
-			//
-			context.save();
-			context.fillStyle = '#000';
-		  context.fillRect(position.x, position.y, width, height);
-		  context.restore();
-		};
+	//
+	// Function: Draw invisible shape on canvas
+	//	
+	EaterGraphicsComponent.prototype.draw = function(context) {
+		var position = this.entity.components.physics.position,
+				width    = this.entity.size.x,
+				height   = this.entity.size.y;
+		//
+		context.save();
+		context.fillStyle = 'rgba(0,0,0,0)';
+	  context.fillRect(position.x, position.y, width, height);
+	  context.restore();
+	};
+
 
 exports.EaterGraphicsComponent = EaterGraphicsComponent;
 },{}],9:[function(require,module,exports){
+//
+// KeeperGraphicsComponent
+//  |_ entity
+//  \_ draw()
+//
+
 var KeeperGraphicsComponent = function(entity) {
 	this.entity = entity;
 };
 
-		KeeperGraphicsComponent.prototype.draw = function(context) {
-			var position = this.entity.components.physics.position,
-					width    = this.entity.size.x,
-					height   = this.entity.size.y;
-			//
-			context.save();
-			context.fillStyle = 'rgba(0,0,0,0)';
-		  context.fillRect(position.x, position.y, width, height);
-		  context.restore();
-		};
+	//
+	// Function: Draw invisible shape on canvas
+	//
+	KeeperGraphicsComponent.prototype.draw = function(context) {
+		var position = this.entity.components.physics.position,
+				width    = this.entity.size.x,
+				height   = this.entity.size.y;
+		//
+		context.save();
+		context.fillStyle = 'rgba(0,0,0,0)';
+	  context.fillRect(position.x, position.y, width, height);
+	  context.restore();
+	};
+
 
 exports.KeeperGraphicsComponent = KeeperGraphicsComponent;
 },{}],10:[function(require,module,exports){
@@ -329,8 +403,8 @@ var graphicsComponent  = require('../components/graphics/bird'),
 //	|_ components{}
 //  |   |_ graphics
 //  |   |_ physics
-//  |   |_ collision
-//  |_ onCollision(entity)
+//  |   \_ collision
+//  \_ onCollision(entity)
 //
 
 var Bird = function() {
@@ -381,11 +455,11 @@ var graphicsComponent  = require('../components/graphics/ceiling'),
 // Ceiling
 //  |_ size{}
 //  |   |_ x
-//  |   |_ y
-//  |_ components{}
+//  |   \_ y
+//  \_ components{}
 //      |_ graphics
 //      |_ physics
-//      |_ collision
+//      \_ collision
 //
 
 var Ceiling = function() {
@@ -400,7 +474,7 @@ var Ceiling = function() {
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
 	
 	// Setting components
-	physics.position.x = -1;
+	physics.position.x = -1.2;
 	physics.position.y = 1;
 
 	// Framing components
@@ -426,10 +500,10 @@ var graphicsComponent  = require('../components/graphics/ground'),
 //  |_ size{}
 //  |   |_ x
 //  |   |_ y
-//  |_ components{}
+//  \_ components{}
 //      |_ graphics
 //      |_ physics
-//      |_ collision
+//      \_ collision
 //
 
 var Ground = function() {
@@ -444,7 +518,7 @@ var Ground = function() {
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
 	
 	// Setting components
-	physics.position.x = -1;
+	physics.position.x = -1.2;
 	physics.position.y =  0;
 
 	// Framing components in one object
@@ -471,11 +545,11 @@ var graphicsComponent  = require('../components/graphics/pipe'),
 // Pipe
 // |_ size{}
 // |   |_ x
-// |   |_ y
-// |_ components{}
+// |   \_ y
+// \_ components{}
 //     |_ graphics
 //     |_ physics
-//     |_ collision
+//     \_ collision
 //
 
 var Pipe = function(loc, height) {
@@ -566,7 +640,6 @@ var graphicsComponent  = require('../components/graphics/scoreKeeper'),
 		physicsComponent   = require('../components/physics/physics'),
 		collisionComponent = require('../components/collision/rect.js');
 
-
 //
 // Keeper
 //  |_ size{}
@@ -632,11 +705,11 @@ var graphicsSystem = require('./systems/graphics'),
 //  |_ physics
 //  |_ input
 //  |_ run()
-//  |_ pause() *not implemented
-//  \_ reset() *not implemented
+//  |_ pause()
+//  \_ resume()
 
 var FlapbyBird = function() {
-	this.state = 0; // 0-idle, 1-running, 2-paused, 3-resumed
+	this.state = 0; // 0-idle, 1-running, 2-paused
 	// Array containing graphical entities on the canvas
 	this.entities = [new eater.Eater(), new keeper.Keeper(), new bird.Bird(),
 									 new ground.Ground(), new ceiling.Ceiling()];
@@ -655,14 +728,12 @@ var FlapbyBird = function() {
 			this.physics.run();
 			this.input.run();
 			this.state = 1;
-			console.log('state: ', this.state);
 		};
 
 		//
 		// Function:
 		//
 		FlapbyBird.prototype.pause = function() {
-			if (this.state != 1 && this.state != 3) return;
 			this.graphics.pause();
 			this.physics.pause();
 			this.state = 2;
@@ -672,10 +743,9 @@ var FlapbyBird = function() {
 		// Function:
 		//
 		FlapbyBird.prototype.resume = function() {
-			if (this.state != 2) return;
-			this.graphics.resume();
+			this.graphics.run();
 			this.physics.resume();
-			this.state = 3;
+			this.state = 1;
 		};
 
 
@@ -736,15 +806,15 @@ var CollisionSystem = function(entities) {
 						// Call the entity's own collision handler
 						entityA.components.collision.onCollision(entityB);
 						
-						// // If the entity is a bird...
-						// if (entityA instanceof bird.Bird) {
-						// 	// Remove all drawn pipes
-						// 	this.graphicsSystem.deleteAllPipes();
-						// 	// Reset score
-						// 	this.score  = 0;
-						// 	this.points = 0;
-						// 	this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
-						// }
+						// If the entity is a bird...
+						if (entityA instanceof bird.Bird) {
+							// Remove all drawn pipes
+							this.graphicsSystem.deleteAllPipes();
+							// Reset score
+							this.score  = 0;
+							this.points = 0;
+							this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
+						}
 					
 						// If pipeEater collides with pipes, delete that pipes
 						if (entityA instanceof eater.Eater && entityB instanceof pipe.Pipe) {
@@ -776,14 +846,17 @@ exports.CollisionSystem = CollisionSystem;
 //
 //	Required by game.js --> main.js
 //
-var pipe    = require('../entities/pipe');
+var pipe = require('../entities/pipe');
 
 // Graphics System is responsible for putting visuals on the canvas
 // GraphicsSystem(entities)
 //  |_ entities[]
 //  |_ canvas
 //  |_ context
+//  |_ animFrame
+//  |_ pipeCreation
 //  |_ run()
+//  |_ pause()
 //  |_ tick()
 //  |_ createNewPipes()
 //  |   |_ minGap
@@ -806,7 +879,7 @@ var GraphicsSystem = function(entities) {
 	this.canvas   = document.getElementById('main-canvas');
 	this.context  = this.canvas.getContext('2d');
 	this.animFrame = 0; // Will contained ID returned by requestAnimationFrame()
-	this.pipeCreation = 150; // Will hold timer for createNewPipes()
+	this.pipeCreation = 150; // Indicates how many ticks between creating new pipes
 };
 
 	//
@@ -816,8 +889,6 @@ var GraphicsSystem = function(entities) {
 		// Execute one tick of GraphicsSystem before the next paint cycle
 		// There are normally 60 paint cycles in 1 second
 		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
-		// Create new pipes every 2 seconds
-		//this.pipeCreation = new setTimer(this.createNewPipes.bind(this), 2000);
 	};
 
 	//
@@ -825,15 +896,6 @@ var GraphicsSystem = function(entities) {
 	//
 	GraphicsSystem.prototype.pause = function() {
 		window.cancelAnimationFrame(this.animFrame);
-		//this.pipeCreation.pause();
-	};
-
-	//
-	// Function:
-	//
-	GraphicsSystem.prototype.resume = function() {
-		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
-		//this.pipeCreation.resume();
 	};
 
 	//
@@ -861,6 +923,12 @@ var GraphicsSystem = function(entities) {
 		// Uncomment to see
 		//this.drawGrid();
 
+		// Create new pipes every so often
+		if (--this.pipeCreation === 0) {
+			this.createNewPipes();
+			this.pipeCreation = 150;
+		}
+
 		// Go through each entity in the list
 		for (var i = 0; i < this.entities.length; i++) {
 			var entity = this.entities[i];
@@ -870,12 +938,6 @@ var GraphicsSystem = function(entities) {
 			}
 			// If there is graphic component, execute it's draw()
 			entity.components.graphics.draw(this.context);
-		}
-
-		console.log(this.pipeCreation);
-		if (--this.pipeCreation === 0) {
-			this.createNewPipes();
-			this.pipeCreation = 150;
 		}
 
 		// Dawing grid on top of the entities
@@ -1026,7 +1088,9 @@ var collisionSystem = require('./collision');
 //  |_ entities[]
 //  |_ collisionSystem
 //  |_ run()
-//  |_ tick()
+//  |_ pause()
+//  |_ resume()
+//  \_ tick()
 
 var PhysicsSystem = function(entities) {
 	this.entities = entities;
@@ -1043,14 +1107,14 @@ var PhysicsSystem = function(entities) {
 		};
 
 		//
-		//
+		// Function: Pause the physics ticks
 		//
 		PhysicsSystem.prototype.pause = function() {
 			this.physicsTick.pause();
 		};
 
 		//
-		//
+		// Function: Resume physics ticks
 		//
 		PhysicsSystem.prototype.resume = function() {
 			this.physicsTick.resume();

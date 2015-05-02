@@ -9,7 +9,9 @@ var collisionSystem = require('./collision');
 //  |_ entities[]
 //  |_ collisionSystem
 //  |_ run()
-//  |_ tick()
+//  |_ pause()
+//  |_ resume()
+//  \_ tick()
 
 var PhysicsSystem = function(entities) {
 	this.entities = entities;
@@ -26,14 +28,14 @@ var PhysicsSystem = function(entities) {
 		};
 
 		//
-		//
+		// Function: Pause the physics ticks
 		//
 		PhysicsSystem.prototype.pause = function() {
 			this.physicsTick.pause();
 		};
 
 		//
-		//
+		// Function: Resume physics ticks
 		//
 		PhysicsSystem.prototype.resume = function() {
 			this.physicsTick.resume();

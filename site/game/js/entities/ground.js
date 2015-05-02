@@ -10,10 +10,10 @@ var graphicsComponent  = require('../components/graphics/ground'),
 //  |_ size{}
 //  |   |_ x
 //  |   |_ y
-//  |_ components{}
+//  \_ components{}
 //      |_ graphics
 //      |_ physics
-//      |_ collision
+//      \_ collision
 //
 
 var Ground = function() {
@@ -28,7 +28,7 @@ var Ground = function() {
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
 	
 	// Setting components
-	physics.position.x = -1;
+	physics.position.x = -1.2;
 	physics.position.y =  0;
 
 	// Framing components in one object

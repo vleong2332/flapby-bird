@@ -6,7 +6,6 @@ var graphicsComponent  = require('../components/graphics/scoreKeeper'),
 		physicsComponent   = require('../components/physics/physics'),
 		collisionComponent = require('../components/collision/rect.js');
 
-
 //
 // Keeper
 //  |_ size{}

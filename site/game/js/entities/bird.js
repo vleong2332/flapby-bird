@@ -12,8 +12,8 @@ var graphicsComponent  = require('../components/graphics/bird'),
 //	|_ components{}
 //  |   |_ graphics
 //  |   |_ physics
-//  |   |_ collision
-//  |_ onCollision(entity)
+//  |   \_ collision
+//  \_ onCollision(entity)
 //
 
 var Bird = function() {

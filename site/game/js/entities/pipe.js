@@ -11,11 +11,11 @@ var graphicsComponent  = require('../components/graphics/pipe'),
 // Pipe
 // |_ size{}
 // |   |_ x
-// |   |_ y
-// |_ components{}
+// |   \_ y
+// \_ components{}
 //     |_ graphics
 //     |_ physics
-//     |_ collision
+//     \_ collision
 //
 
 var Pipe = function(loc, height) {

@@ -1,14 +1,17 @@
 //
 //	Required by game.js --> main.js
 //
-var pipe    = require('../entities/pipe');
+var pipe = require('../entities/pipe');
 
 // Graphics System is responsible for putting visuals on the canvas
 // GraphicsSystem(entities)
 //  |_ entities[]
 //  |_ canvas
 //  |_ context
+//  |_ animFrame
+//  |_ pipeCreation
 //  |_ run()
+//  |_ pause()
 //  |_ tick()
 //  |_ createNewPipes()
 //  |   |_ minGap
@@ -31,7 +34,7 @@ var GraphicsSystem = function(entities) {
 	this.canvas   = document.getElementById('main-canvas');
 	this.context  = this.canvas.getContext('2d');
 	this.animFrame = 0; // Will contained ID returned by requestAnimationFrame()
-	this.pipeCreation = 150; // Will hold timer for createNewPipes()
+	this.pipeCreation = 150; // Indicates how many ticks between creating new pipes
 };
 
 	//
@@ -41,8 +44,6 @@ var GraphicsSystem = function(entities) {
 		// Execute one tick of GraphicsSystem before the next paint cycle
 		// There are normally 60 paint cycles in 1 second
 		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
-		// Create new pipes every 2 seconds
-		//this.pipeCreation = new setTimer(this.createNewPipes.bind(this), 2000);
 	};
 
 	//
@@ -50,15 +51,6 @@ var GraphicsSystem = function(entities) {
 	//
 	GraphicsSystem.prototype.pause = function() {
 		window.cancelAnimationFrame(this.animFrame);
-		//this.pipeCreation.pause();
-	};
-
-	//
-	// Function:
-	//
-	GraphicsSystem.prototype.resume = function() {
-		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
-		//this.pipeCreation.resume();
 	};
 
 	//
@@ -86,6 +78,12 @@ var GraphicsSystem = function(entities) {
 		// Uncomment to see
 		//this.drawGrid();
 
+		// Create new pipes every so often
+		if (--this.pipeCreation === 0) {
+			this.createNewPipes();
+			this.pipeCreation = 150;
+		}
+
 		// Go through each entity in the list
 		for (var i = 0; i < this.entities.length; i++) {
 			var entity = this.entities[i];
@@ -95,12 +93,6 @@ var GraphicsSystem = function(entities) {
 			}
 			// If there is graphic component, execute it's draw()
 			entity.components.graphics.draw(this.context);
-		}
-
-		console.log(this.pipeCreation);
-		if (--this.pipeCreation === 0) {
-			this.createNewPipes();
-			this.pipeCreation = 150;
 		}
 
 		// Dawing grid on top of the entities

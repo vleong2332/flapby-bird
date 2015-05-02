@@ -1,3 +1,9 @@
+//
+// PipeGraphicsComponent
+//  |_ entity
+//  \_ draw()
+//
+
 var PipeGraphicsComponent = function(entity) {
 	this.entity = entity;
 };

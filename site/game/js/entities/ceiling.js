@@ -9,11 +9,11 @@ var graphicsComponent  = require('../components/graphics/ceiling'),
 // Ceiling
 //  |_ size{}
 //  |   |_ x
-//  |   |_ y
-//  |_ components{}
+//  |   \_ y
+//  \_ components{}
 //      |_ graphics
 //      |_ physics
-//      |_ collision
+//      \_ collision
 //
 
 var Ceiling = function() {
@@ -28,7 +28,7 @@ var Ceiling = function() {
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
 	
 	// Setting components
-	physics.position.x = -1;
+	physics.position.x = -1.2;
 	physics.position.y = 1;
 
 	// Framing components

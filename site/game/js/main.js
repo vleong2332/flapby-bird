@@ -5,12 +5,15 @@ document.addEventListener('DOMContentLoaded', function() {
 	var app = new flapbyBird.FlapbyBird();
 	app.run();
 
+	// Bind space key to pause and resume the game
 	document.addEventListener('keydown', function(event) {
 		if (event.keyCode == 32) {
-			if (app.state == 1 || app.state == 3)
+			if (app.state == 1) {
 				app.pause();
-			else if (app.state == 2)
+			}
+			else if (app.state == 2) {
 				app.resume();
+			}
 		}
 	});
 });
