@@ -31,7 +31,7 @@ var GraphicsSystem = function(entities) {
 	this.canvas   = document.getElementById('main-canvas');
 	this.context  = this.canvas.getContext('2d');
 	this.animFrame = 0; // Will contained ID returned by requestAnimationFrame()
-	this.pipeCreation = 0; // Will hold timer for createNewPipes()
+	this.pipeCreation = 150; // Will hold timer for createNewPipes()
 };
 
 	//
@@ -42,7 +42,7 @@ var GraphicsSystem = function(entities) {
 		// There are normally 60 paint cycles in 1 second
 		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
 		// Create new pipes every 2 seconds
-		this.pipeCreation = new setTimer(this.createNewPipes.bind(this), 2000);
+		//this.pipeCreation = new setTimer(this.createNewPipes.bind(this), 2000);
 	};
 
 	//
@@ -50,7 +50,7 @@ var GraphicsSystem = function(entities) {
 	//
 	GraphicsSystem.prototype.pause = function() {
 		window.cancelAnimationFrame(this.animFrame);
-		this.pipeCreation.pause();
+		//this.pipeCreation.pause();
 	};
 
 	//
@@ -58,7 +58,7 @@ var GraphicsSystem = function(entities) {
 	//
 	GraphicsSystem.prototype.resume = function() {
 		this.animFrame = window.requestAnimationFrame(this.tick.bind(this));
-		this.pipeCreation.resume();
+		//this.pipeCreation.resume();
 	};
 
 	//
@@ -95,6 +95,12 @@ var GraphicsSystem = function(entities) {
 			}
 			// If there is graphic component, execute it's draw()
 			entity.components.graphics.draw(this.context);
+		}
+
+		console.log(this.pipeCreation);
+		if (--this.pipeCreation === 0) {
+			this.createNewPipes();
+			this.pipeCreation = 150;
 		}
 
 		// Dawing grid on top of the entities
