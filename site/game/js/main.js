@@ -16,4 +16,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			}
 		}
 	});
+
+	//
+	var continueButton = document.getElementById('continue');
+	continueButton.addEventListener('click', function() {
+		app.resume();
+	});
+
 });

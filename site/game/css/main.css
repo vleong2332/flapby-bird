@@ -4,11 +4,16 @@
     font-weight: normal;
     font-style: normal;
 }
-
 * {
 	-webkit-box-sizing: border-box; /* Safari 3.0 - 5.0, Chrome 1 - 9, Android 2.1 - 3.x */
   -moz-box-sizing: border-box;    /* Firefox 1 - 28 */
   box-sizing: border-box;         /* Safari 5.1+, Chrome 10+, Firefox 29+, Opera 7+, IE 8+, Android 4.0+, iOS any */
+}
+*:focus {
+	outline: none;
+}
+.hidden {
+	display: none;
 }
 
 html, body {
@@ -28,11 +33,11 @@ canvas#main-canvas, div#overlay {
 
 div#overlay {
 	position: absolute;
+	width: 100%;
+	height: 100%;
 	z-index: 1;
 	top: 0;
 	left: 0;
-	bottom: 0;
-	right: 0;
 	font-family: 'FlappyBird';
 	font-size: 1.5rem;
 	padding: 1rem;
@@ -41,4 +46,36 @@ div#overlay {
   -ms-user-select: none;      /* IE 10+ */
   -o-user-select: none;
   user-select: none;  
+}
+
+div#pause-overlay {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	text-align: center;
+	z-index: 2;
+	background-color: rgba(175, 175, 175, 0.85 );
+}
+div#pause-content {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 1.75rem;
+}
+button#continue {
+	border: none;
+	padding: 0.5rem 2rem;
+	background-color: #4C3D46;
+	color: #FFF;
+	font-family: 'Helvetica', 'Arial', sans-serif;
+	cursor: pointer;
+}
+
+div#instructions {
+	position: absolute;
+	bottom: 0;
+	left: 1rem;
 }
