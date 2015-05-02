@@ -35,6 +35,10 @@ var GraphicsSystem = function(entities) {
 	this.context  = this.canvas.getContext('2d');
 	this.animFrame = 0; // Will contained ID returned by requestAnimationFrame()
 	this.pipeCreation = 150; // Indicates how many ticks between creating new pipes
+
+		console.log('canvas.width: ', this.canvas.width, this.canvas.height);
+		console.log('canvas.offset: ', this.canvas.offsetWidth, this.canvas.offsetHeight);
+		console.log('inner window: ', window.innerWidth, window.innerHeight);
 };
 
 	//
@@ -57,6 +61,9 @@ var GraphicsSystem = function(entities) {
 	// Function: Execute all GraphicsSystem activities in one tick
 	//
 	GraphicsSystem.prototype.tick = function() {
+		console.log('canvas.width: ', this.canvas.width, this.canvas.height);
+		console.log('canvas.offset: ', this.canvas.offsetWidth, this.canvas.offsetHeight);
+		console.log('inner window: ', window.innerWidth, window.innerHeight);
 		// Ensure drawing area is the same as canvas area even when resize
 		if (this.canvas.width   != this.canvas.offsetWidth ||
 			  this.canvas.height  != this.canvas.offsetHeight) {
