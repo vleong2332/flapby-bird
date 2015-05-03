@@ -59,7 +59,7 @@ var ScoreSystem = function() {
 	//
 	ScoreSystem.prototype.loadHiScore = function() {
 		if (Modernizr.localstorage) {
-			return parseInt(window.localStorage.getItem('hiScore')) || 0;
+			return parseInt(window.localStorage.getItem('hiScore')) || parseInt('0');
 		}
 		else {
 			console.log("Local Storage is not available with in this browser. High Score cannot be loaded.");
