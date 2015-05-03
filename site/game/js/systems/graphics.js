@@ -158,19 +158,6 @@ var GraphicsSystem = function(entities) {
 	};
 
 	//
-	// Function: Update scores passed from collision system
-	//
-	GraphicsSystem.prototype.updateScore = function(score, hiScore) {
-		//console.log("updating score");
-		// Set high score
-		if (score > hiScore) hiScore = score;
-		// Display scores to the HTML
-		document.getElementById('score').innerHTML    = score;
-		document.getElementById('hi-score').innerHTML = hiScore;
-		return hiScore;
-	};
-
-	//
 	// Function: Draw grid based on given gap size and how many lines should be drawn
 	//
 	GraphicsSystem.prototype.drawGrid = function(gap, times) {

@@ -4,6 +4,7 @@
 var graphicsSystem = require('./systems/graphics'),
 		physicsSystem  = require('./systems/physics'),
 		inputSystem    = require('./systems/input'),
+		scoreSystem    = require('./systems/score'),
 		bird           = require('./entities/bird'),
 		pipe           = require('./entities/pipe'),
 		ground         = require('./entities/ground'),
@@ -13,10 +14,13 @@ var graphicsSystem = require('./systems/graphics'),
 
 // FlapbyBird is the main function for the game. It starts and stops the game.
 // FlapbyBird
+//  |_ state
 //  |_ entities[]
 //  |_ graphics
 //  |_ physics
 //  |_ input
+//  |_ score
+//  |_ init()
 //  |_ run()
 //  |_ pause()
 //  \_ resume()
@@ -30,13 +34,15 @@ var FlapbyBird = function() {
 	this.graphics = new graphicsSystem.GraphicsSystem(this.entities);
 	this.physics  = new physicsSystem.PhysicsSystem(this.entities);
 	this.input    = new inputSystem.InputSystem(this.entities);
+	this.score    = new scoreSystem.ScoreSystem();
 };
 
 	//
-	//
+	// Function: Set the game for play
 	//
 	FlapbyBird.prototype.init = function() {
 		this.graphics.init();
+		this.score.updateScore();
 		this.state = 0;
 	};
 
