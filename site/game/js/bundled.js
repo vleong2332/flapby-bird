@@ -700,6 +700,7 @@ exports.Keeper = Keeper;
 var graphicsSystem = require('./systems/graphics'),
 		physicsSystem  = require('./systems/physics'),
 		inputSystem    = require('./systems/input'),
+		scoreSystem    = require('./systems/score'),
 		bird           = require('./entities/bird'),
 		pipe           = require('./entities/pipe'),
 		ground         = require('./entities/ground'),
@@ -709,10 +710,13 @@ var graphicsSystem = require('./systems/graphics'),
 
 // FlapbyBird is the main function for the game. It starts and stops the game.
 // FlapbyBird
+//  |_ state
 //  |_ entities[]
 //  |_ graphics
 //  |_ physics
 //  |_ input
+//  |_ score
+//  |_ init()
 //  |_ run()
 //  |_ pause()
 //  \_ resume()
@@ -726,13 +730,15 @@ var FlapbyBird = function() {
 	this.graphics = new graphicsSystem.GraphicsSystem(this.entities);
 	this.physics  = new physicsSystem.PhysicsSystem(this.entities);
 	this.input    = new inputSystem.InputSystem(this.entities);
+	this.score    = new scoreSystem.ScoreSystem();
 };
 
 	//
-	//
+	// Function: Set the game for play
 	//
 	FlapbyBird.prototype.init = function() {
 		this.graphics.init();
+		this.score.updateScore();
 		this.state = 0;
 	};
 
@@ -767,11 +773,12 @@ var FlapbyBird = function() {
 
 
 exports.FlapbyBird = FlapbyBird;
-},{"./entities/bird":11,"./entities/ceiling":12,"./entities/ground":13,"./entities/pipe":14,"./entities/pipeEater":15,"./entities/scoreKeeper":16,"./systems/graphics":19,"./systems/input":20,"./systems/physics":21}],18:[function(require,module,exports){
+},{"./entities/bird":11,"./entities/ceiling":12,"./entities/ground":13,"./entities/pipe":14,"./entities/pipeEater":15,"./entities/scoreKeeper":16,"./systems/graphics":19,"./systems/input":20,"./systems/physics":21,"./systems/score":22}],18:[function(require,module,exports){
 //
 // Required by physics.js --> game.js --> main.js
 //
 var graphicsSystem = require ('./graphics'),
+		scoreSystem    = require ('./score'),
 		eater          = require ('../entities/pipeEater'),
 		pipe           = require ('../entities/pipe'),
 		bird           = require ('../entities/bird'),
@@ -782,17 +789,13 @@ var graphicsSystem = require ('./graphics'),
 // CollisionSystem(entities)
 //  |_ entities[]
 //  |_ graphicsSystem
-//  |_ points
-//  |_ score
-//  |_ hiScore
+//  |_ scoreSystem
 //  \_ tick()
 
 var CollisionSystem = function(entities) {
 	this.entities = entities;
 	this.graphicsSystem = new graphicsSystem.GraphicsSystem(entities);
-	this.points  = 0;
-	this.score   = 0;
-	this.hiScore = 0;
+	this.scoreSystem = new scoreSystem.ScoreSystem();
 };
 
 		//
@@ -828,9 +831,7 @@ var CollisionSystem = function(entities) {
 							// Remove all drawn pipes
 							this.graphicsSystem.deleteAllPipes();
 							// Reset score
-							this.score  = 0;
-							this.points = 0;
-							this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
+							this.scoreSystem.resetScore();
 						}
 					
 						// If pipeEater collides with pipes, delete that pipes
@@ -840,12 +841,7 @@ var CollisionSystem = function(entities) {
 						
 						// Update score if scoreKeeper collides with pipe
 						if (entityA instanceof keeper.Keeper && entityB instanceof pipe.Pipe) {
-							this.points++;
-							//console.log(this.points);
-							if (this.points % 66 === 0) {
-								this.score++;
-								this.hiScore = this.graphicsSystem.updateScore(this.score, this.hiScore);
-							}
+							this.scoreSystem.countScore();
 						}
 					}
 					// If collision is detected and the second entity has collision handler...
@@ -859,7 +855,7 @@ var CollisionSystem = function(entities) {
 
 
 exports.CollisionSystem = CollisionSystem;
-},{"../entities/bird":11,"../entities/pipe":14,"../entities/pipeEater":15,"../entities/scoreKeeper":16,"./graphics":19}],19:[function(require,module,exports){
+},{"../entities/bird":11,"../entities/pipe":14,"../entities/pipeEater":15,"../entities/scoreKeeper":16,"./graphics":19,"./score":22}],19:[function(require,module,exports){
 //
 //	Required by game.js --> main.js
 //
@@ -1020,19 +1016,6 @@ var GraphicsSystem = function(entities) {
 	};
 
 	//
-	// Function: Update scores passed from collision system
-	//
-	GraphicsSystem.prototype.updateScore = function(score, hiScore) {
-		//console.log("updating score");
-		// Set high score
-		if (score > hiScore) hiScore = score;
-		// Display scores to the HTML
-		document.getElementById('score').innerHTML    = score;
-		document.getElementById('hi-score').innerHTML = hiScore;
-		return hiScore;
-	};
-
-	//
 	// Function: Draw grid based on given gap size and how many lines should be drawn
 	//
 	GraphicsSystem.prototype.drawGrid = function(gap, times) {
@@ -1173,4 +1156,88 @@ var PhysicsSystem = function(entities) {
 
 
 exports.PhysicsSystem = PhysicsSystem;
-},{"./collision":18}]},{},[1]);
+},{"./collision":18}],22:[function(require,module,exports){
+//
+// Required by collision.js
+//
+
+//
+// ScoreSystem interacts with the game and Local Storage API
+// ScoreSystem
+//  |_ points
+//  |_ score
+//  |_ hiScore
+//  |_ countScore()
+//  |_ resetScore()
+//  |_ updateScore()
+//  |_ loadHiScore()
+//  \_ saveHiScore()
+//
+
+var ScoreSystem = function() {
+	this.points  = 0;
+	this.score   = 0;
+	this.hiScore = this.loadHiScore();
+};
+
+	//
+	// Function: Turn points into score
+	//
+	ScoreSystem.prototype.countScore = function() {
+		this.points++;
+		if (this.points % 66 === 0) {
+			this.score++;
+		}
+		// Set high score
+		if (this.score > this.hiScore) {
+			this.hiScore = this.score;
+			this.saveHiScore();
+		}
+		this.updateScore();
+	};
+
+	//
+	// Function: Reset score to 0
+	//
+	ScoreSystem.prototype.resetScore = function() {
+		this.points = 0;
+		this.score  = 0;
+		this.updateScore();
+	};
+
+	//
+	// Function: Reflect the score on the game
+	//
+	ScoreSystem.prototype.updateScore = function() {
+		document.getElementById('score').innerHTML    = this.score;
+		document.getElementById('hi-score').innerHTML = this.hiScore;
+	};
+
+	//
+	// Function: Try to get previously stored hiScore
+	//
+	ScoreSystem.prototype.loadHiScore = function() {
+		if (Modernizr.localstorage) {
+			return parseInt(window.localStorage.getItem('hiScore')) || parseInt('0');
+		}
+		else {
+			console.log("Local Storage is not available with in this browser. High Score cannot be loaded.");
+			return 0;
+		}
+	};
+
+	//
+	// Function: Store hiScore in Local Storage
+	//
+	ScoreSystem.prototype.saveHiScore = function() {
+		if (Modernizr.localstorage) {
+			window.localStorage.setItem('hiScore', this.hiScore);
+		}
+		else {
+			console.log("Local Storage is not available with in this browser. High Score cannot be saved.");
+		}
+	};
+
+
+exports.ScoreSystem = ScoreSystem;
+},{}]},{},[1]);
