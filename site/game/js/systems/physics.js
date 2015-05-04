@@ -1,9 +1,4 @@
 //
-// Required by game.js --> main.js
-//
-var collisionSystem = require('./collision');
-
-//
 // PhysicsSystem updates physics components of entities. It runs in sync with CollisionSystem.
 // PhysicsSystem
 //  |_ entities[]
@@ -13,9 +8,9 @@ var collisionSystem = require('./collision');
 //  |_ resume()
 //  \_ tick()
 
-var PhysicsSystem = function(entities) {
-	this.entities = entities;
-	this.collisionSystem = new collisionSystem.CollisionSystem(entities);
+var PhysicsSystem = function() {
+	this.entities = null;
+	this.collisionSystem = null;
 	this.physicsTick = 0;
 };
 

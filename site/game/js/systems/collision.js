@@ -1,8 +1,4 @@
-//
-// Required by physics.js --> game.js --> main.js
-//
-var graphicsSystem = require ('./graphics'),
-		scoreSystem    = require ('./score'),
+var scoreSystem    = require ('./score'),
 		eater          = require ('../entities/pipeEater'),
 		pipe           = require ('../entities/pipe'),
 		bird           = require ('../entities/bird'),
@@ -16,9 +12,10 @@ var graphicsSystem = require ('./graphics'),
 //  |_ scoreSystem
 //  \_ tick()
 
-var CollisionSystem = function(entities) {
-	this.entities = entities;
-	this.graphicsSystem = new graphicsSystem.GraphicsSystem(entities);
+var CollisionSystem = function() {
+	this.entities = null;
+	this.graphicsSystem = null;
+	this.physicsSystem = null;
 	this.scoreSystem = new scoreSystem.ScoreSystem();
 };
 
@@ -45,6 +42,7 @@ var CollisionSystem = function(entities) {
 					if (!entityA.components.collision.collidesWith(entityB)) {
 						continue;
 					}
+					
 					// If collision is detected and if entity has a collition handler
 					if (entityA.components.collision.onCollision) {
 						// Call the entity's own collision handler
@@ -52,10 +50,10 @@ var CollisionSystem = function(entities) {
 						
 						// If the entity is a bird...
 						if (entityA instanceof bird.Bird) {
-							// Remove all drawn pipes
-							this.graphicsSystem.deleteAllPipes();
-							// Reset score
+							this.graphicsSystem.reset();
+							this.physicsSystem.pause();
 							this.scoreSystem.resetScore();
+							window.setTimeout(this.physicsSystem.run.bind(this.physicsSystem), 4000);
 						}
 					
 						// If pipeEater collides with pipes, delete that pipes
@@ -75,6 +73,7 @@ var CollisionSystem = function(entities) {
 					}
 				}
 			}
+			this.statusReturn = 0;
 		};
 
 

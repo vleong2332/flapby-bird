@@ -1,8 +1,4 @@
 //
-// Required by collision.js
-//
-
-//
 // ScoreSystem interacts with the game and Local Storage API
 // ScoreSystem
 //  |_ points

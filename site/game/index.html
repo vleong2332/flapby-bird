@@ -23,9 +23,8 @@
         </canvas>
         <div id="overlay">
             <div id="scores">
-                High-score: <span id="hi-score">0</span>
-                <br />
-                Score: <span id="score">0</span>
+                <p>High-score: <span id="hi-score"></span></p>
+                <p>Score: <span id="score"></span></p>
             </div>
             <div id="pause-overlay" class="hidden">
                 <div id="pause-content">
@@ -40,6 +39,11 @@
                 <div id="play-content">
                     <p>Click or tap to keep me afloat.</p>
                     <p>Ready when you are.</p>
+                </div>
+            </div>
+            <div id="reset-overlay" class="hidden">
+                <div id="reset-content">
+                    <p>Reset in <span id="reset-counter"></span></p>
                 </div>
             </div>
         </div>

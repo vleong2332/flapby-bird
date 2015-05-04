@@ -1,9 +1,5 @@
 //
-// Required by game.js --> main.js
-//
-
-//
-// InputSystem handles all events triggered by the user
+// InputSystem handles all events triggered by the user related to the game itself
 // InputSystem(entities)
 //  |_ entities[]
 //  |_ canvas
@@ -11,8 +7,8 @@
 //  |_ run()
 //  \_ flap()
 
-var InputSystem = function(entities) {
-	this.entities = entities;
+var InputSystem = function(game) {
+	this.entities = null;
 	this.canvas   = document.getElementById('main-canvas');
 	this.overlay  = document.getElementById('overlay');
 };

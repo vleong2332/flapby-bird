@@ -80,7 +80,7 @@ div#pause-instruction {
 	left: 1rem;
 }
 
-div#play-instruction {
+div#play-instruction, div#reset-overlay {
 	position: absolute;
 	text-align: center;
 	width: 100%;
@@ -89,9 +89,13 @@ div#play-instruction {
 	left: 0;
 	z-index: 10;
 }
-div#play-content {
+div#play-content, div#reset-content {
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, 10%);
+}
+
+div#reset-content {
+	top: 38%;
 }

@@ -1,6 +1,3 @@
-//
-//	Required by game.js --> main.js
-//
 var pipe = require('../entities/pipe');
 
 // Graphics System is responsible for putting visuals on the canvas
@@ -23,18 +20,19 @@ var pipe = require('../entities/pipe');
 //  |   |_ lwrHeight
 //  |   |_ upperPipe
 //  |   \_ lowerPipe
+//  |_ resetGraphics()
 //  |_ deleteAllPipes()
 //  |_ deleteLastTwoPipes()
 //  |_ updateScore(score, hiScore)
 //  \_ drawGrid(gap, times)
 //
 
-var GraphicsSystem = function(entities) {
-	this.entities = entities;
-	this.canvas   = document.getElementById('main-canvas');
-	this.context  = this.canvas.getContext('2d');
-	this.animFrame = 0; // Will contained ID returned by requestAnimationFrame()
-	this.pipeCreation = 150; // Indicates how many ticks between creating new pipes
+var GraphicsSystem = function() {
+	this.entity       = null;
+	this.canvas       = document.getElementById('main-canvas');
+	this.context      = this.canvas.getContext('2d');
+	this.animFrame    = 0; // Will contained ID returned by requestAnimationFrame()
+	this.pipeCreation = 50; // Indicates how many ticks between creating new pipes
 };
 
 	//
@@ -57,11 +55,38 @@ var GraphicsSystem = function(entities) {
 	};
 
 	//
-	// Function:
+	// Function: Pause the graphics system
 	//
 	GraphicsSystem.prototype.pause = function() {
 		window.cancelAnimationFrame(this.animFrame);
 		document.getElementById('pause-overlay').className = "";
+	};
+
+	//
+	// Function: Reset the game graphics
+	//
+	GraphicsSystem.prototype.reset = function() {
+		window.cancelAnimationFrame(this.animFrame);
+	 	var counter   = 3,
+				counterId = 0,
+				overlay = document.getElementById('reset-overlay');
+		
+		var thisSub = this;
+		counterId = window.setInterval(function() {
+			if (counter !== 0) {
+				overlay.className = "";
+	 			document.getElementById('reset-counter').innerHTML = counter--;
+		 	}
+		 	else {
+		 		overlay.className = "hidden";
+		 		thisSub.deleteAllPipes.bind(thisSub);
+		 		thisSub.deleteAllPipes();
+		 		thisSub.tick.bind(thisSub);
+		 		thisSub.tick(1);
+				this.animFrame = window.requestAnimationFrame(thisSub.tick.bind(thisSub));
+		 		window.clearInterval(counterId);
+		 	}
+		}, 1000);
 	};
 
 	//
@@ -184,8 +209,6 @@ var GraphicsSystem = function(entities) {
 		this.context.stroke();
 		// this.context.restore();
 	};
-
-
 
 
 exports.GraphicsSystem = GraphicsSystem;

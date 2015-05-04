@@ -3,28 +3,29 @@ var flapbyBird = require('./game');
 
 // Run Flapby Bird game when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+
+	// Load and initialize the game
 	var app = new flapbyBird.FlapbyBird();
 	app.init();
 
-	//
+	// Bind touch and click to initial play instruction to start the game
 	var playInstruction = document.getElementById('play-instruction');
-	playInstruction.addEventListener('click', function() {
-		app.run();
-	});
+	playInstruction.addEventListener('click',      function() {app.run();});
+	playInstruction.addEventListener('touchstart', function() {app.run();});
 
 	// Bind space key to pause and resume the game
 	document.addEventListener('keydown', function(event) {
 		if (event.keyCode == 32) {
 			if (app.state == 1) {app.pause();}
-			else if (app.state == 2) {app.resume();}
+			else
+			if (app.state == 2) {app.resume();}
 		}
 	});
 
-	//
+	// Bind touch and click to continue button to resume the game
 	var continueButton = document.getElementById('continue');
-	continueButton.addEventListener('click', function() {
-		app.resume();
-	});
+	continueButton.addEventListener('click',      function() {app.resume();});
+	continueButton.addEventListener('touchstart', function() {app.resume();});
 
 });
 },{"./game":17}],2:[function(require,module,exports){
@@ -694,28 +695,27 @@ var Keeper = function(loc, height) {
 
 exports.Keeper = Keeper;
 },{"../components/collision/rect.js":3,"../components/graphics/scoreKeeper":9,"../components/physics/physics":10}],17:[function(require,module,exports){
-//
-// Required by main.js
-//
-var graphicsSystem = require('./systems/graphics'),
-		physicsSystem  = require('./systems/physics'),
-		inputSystem    = require('./systems/input'),
-		scoreSystem    = require('./systems/score'),
-		bird           = require('./entities/bird'),
-		pipe           = require('./entities/pipe'),
-		ground         = require('./entities/ground'),
-		ceiling        = require('./entities/ceiling'),
-		eater          = require('./entities/pipeEater'),
-		keeper         = require('./entities/scoreKeeper');
+var graphicsSystem  = require('./systems/graphics'),
+		physicsSystem   = require('./systems/physics'),
+		inputSystem     = require('./systems/input'),
+		scoreSystem     = require('./systems/score'),
+		collisionSystem = require('./systems/collision'),
+		bird            = require('./entities/bird'),
+		pipe            = require('./entities/pipe'),
+		ground          = require('./entities/ground'),
+		ceiling         = require('./entities/ceiling'),
+		eater           = require('./entities/pipeEater'),
+		keeper          = require('./entities/scoreKeeper');
 
 // FlapbyBird is the main function for the game. It starts and stops the game.
 // FlapbyBird
 //  |_ state
 //  |_ entities[]
-//  |_ graphics
-//  |_ physics
 //  |_ input
 //  |_ score
+//  |_ graphics
+//  |_ collision
+//  |_ physics
 //  |_ init()
 //  |_ run()
 //  |_ pause()
@@ -723,14 +723,28 @@ var graphicsSystem = require('./systems/graphics'),
 
 var FlapbyBird = function() {
 	this.state = 0; // 0-idle, 1-running, 2-paused
+
 	// Array containing graphical entities on the canvas
 	this.entities = [new eater.Eater(), new keeper.Keeper(), new bird.Bird(),
 									 new ground.Ground(), new ceiling.Ceiling()];
+	
 	// Various system that handle the array
-	this.graphics = new graphicsSystem.GraphicsSystem(this.entities);
-	this.physics  = new physicsSystem.PhysicsSystem(this.entities);
-	this.input    = new inputSystem.InputSystem(this.entities);
-	this.score    = new scoreSystem.ScoreSystem();
+	this.input     = new inputSystem.InputSystem();
+	this.score     = new scoreSystem.ScoreSystem();
+	this.graphics  = new graphicsSystem.GraphicsSystem();
+	this.collision = new collisionSystem.CollisionSystem();
+	this.physics   = new physicsSystem.PhysicsSystem();
+	
+	// Assigning entities array to the systems to be managed
+	this.input.entities     = this.entities;
+	this.graphics.entities  = this.entities;
+	this.collision.entities = this.entities;
+	this.physics.entities   = this.entities;
+
+	// Link the systems to share info
+	this.collision.graphicsSystem = this.graphics;
+	this.collision.physicsSystem  = this.physics;
+	this.physics.collisionSystem  = this.collision;
 };
 
 	//
@@ -743,7 +757,7 @@ var FlapbyBird = function() {
 	};
 
 	//
-	// Function: run graphics, physics, and input system
+	// Function: Run graphics, physics, and input system
 	//
 	FlapbyBird.prototype.run = function() {
 		// Execute each system's run function
@@ -754,7 +768,7 @@ var FlapbyBird = function() {
 	};
 
 	//
-	// Function:
+	// Function: Pause graphics and pyhsics system
 	//
 	FlapbyBird.prototype.pause = function() {
 		this.graphics.pause();
@@ -763,7 +777,7 @@ var FlapbyBird = function() {
 	};
 
 	//
-	// Function:
+	// Function: Resume graphics and physics system
 	//
 	FlapbyBird.prototype.resume = function() {
 		this.graphics.run();
@@ -773,12 +787,8 @@ var FlapbyBird = function() {
 
 
 exports.FlapbyBird = FlapbyBird;
-},{"./entities/bird":11,"./entities/ceiling":12,"./entities/ground":13,"./entities/pipe":14,"./entities/pipeEater":15,"./entities/scoreKeeper":16,"./systems/graphics":19,"./systems/input":20,"./systems/physics":21,"./systems/score":22}],18:[function(require,module,exports){
-//
-// Required by physics.js --> game.js --> main.js
-//
-var graphicsSystem = require ('./graphics'),
-		scoreSystem    = require ('./score'),
+},{"./entities/bird":11,"./entities/ceiling":12,"./entities/ground":13,"./entities/pipe":14,"./entities/pipeEater":15,"./entities/scoreKeeper":16,"./systems/collision":18,"./systems/graphics":19,"./systems/input":20,"./systems/physics":21,"./systems/score":22}],18:[function(require,module,exports){
+var scoreSystem    = require ('./score'),
 		eater          = require ('../entities/pipeEater'),
 		pipe           = require ('../entities/pipe'),
 		bird           = require ('../entities/bird'),
@@ -792,9 +802,10 @@ var graphicsSystem = require ('./graphics'),
 //  |_ scoreSystem
 //  \_ tick()
 
-var CollisionSystem = function(entities) {
-	this.entities = entities;
-	this.graphicsSystem = new graphicsSystem.GraphicsSystem(entities);
+var CollisionSystem = function() {
+	this.entities = null;
+	this.graphicsSystem = null;
+	this.physicsSystem = null;
 	this.scoreSystem = new scoreSystem.ScoreSystem();
 };
 
@@ -821,6 +832,7 @@ var CollisionSystem = function(entities) {
 					if (!entityA.components.collision.collidesWith(entityB)) {
 						continue;
 					}
+					
 					// If collision is detected and if entity has a collition handler
 					if (entityA.components.collision.onCollision) {
 						// Call the entity's own collision handler
@@ -828,10 +840,10 @@ var CollisionSystem = function(entities) {
 						
 						// If the entity is a bird...
 						if (entityA instanceof bird.Bird) {
-							// Remove all drawn pipes
-							this.graphicsSystem.deleteAllPipes();
-							// Reset score
+							this.graphicsSystem.reset();
+							this.physicsSystem.pause();
 							this.scoreSystem.resetScore();
+							window.setTimeout(this.physicsSystem.run.bind(this.physicsSystem), 4000);
 						}
 					
 						// If pipeEater collides with pipes, delete that pipes
@@ -851,14 +863,12 @@ var CollisionSystem = function(entities) {
 					}
 				}
 			}
+			this.statusReturn = 0;
 		};
 
 
 exports.CollisionSystem = CollisionSystem;
-},{"../entities/bird":11,"../entities/pipe":14,"../entities/pipeEater":15,"../entities/scoreKeeper":16,"./graphics":19,"./score":22}],19:[function(require,module,exports){
-//
-//	Required by game.js --> main.js
-//
+},{"../entities/bird":11,"../entities/pipe":14,"../entities/pipeEater":15,"../entities/scoreKeeper":16,"./score":22}],19:[function(require,module,exports){
 var pipe = require('../entities/pipe');
 
 // Graphics System is responsible for putting visuals on the canvas
@@ -881,18 +891,19 @@ var pipe = require('../entities/pipe');
 //  |   |_ lwrHeight
 //  |   |_ upperPipe
 //  |   \_ lowerPipe
+//  |_ resetGraphics()
 //  |_ deleteAllPipes()
 //  |_ deleteLastTwoPipes()
 //  |_ updateScore(score, hiScore)
 //  \_ drawGrid(gap, times)
 //
 
-var GraphicsSystem = function(entities) {
-	this.entities = entities;
-	this.canvas   = document.getElementById('main-canvas');
-	this.context  = this.canvas.getContext('2d');
-	this.animFrame = 0; // Will contained ID returned by requestAnimationFrame()
-	this.pipeCreation = 150; // Indicates how many ticks between creating new pipes
+var GraphicsSystem = function() {
+	this.entity       = null;
+	this.canvas       = document.getElementById('main-canvas');
+	this.context      = this.canvas.getContext('2d');
+	this.animFrame    = 0; // Will contained ID returned by requestAnimationFrame()
+	this.pipeCreation = 50; // Indicates how many ticks between creating new pipes
 };
 
 	//
@@ -915,11 +926,38 @@ var GraphicsSystem = function(entities) {
 	};
 
 	//
-	// Function:
+	// Function: Pause the graphics system
 	//
 	GraphicsSystem.prototype.pause = function() {
 		window.cancelAnimationFrame(this.animFrame);
 		document.getElementById('pause-overlay').className = "";
+	};
+
+	//
+	// Function: Reset the game graphics
+	//
+	GraphicsSystem.prototype.reset = function() {
+		window.cancelAnimationFrame(this.animFrame);
+	 	var counter   = 3,
+				counterId = 0,
+				overlay = document.getElementById('reset-overlay');
+		
+		var thisSub = this;
+		counterId = window.setInterval(function() {
+			if (counter !== 0) {
+				overlay.className = "";
+	 			document.getElementById('reset-counter').innerHTML = counter--;
+		 	}
+		 	else {
+		 		overlay.className = "hidden";
+		 		thisSub.deleteAllPipes.bind(thisSub);
+		 		thisSub.deleteAllPipes();
+		 		thisSub.tick.bind(thisSub);
+		 		thisSub.tick(1);
+				this.animFrame = window.requestAnimationFrame(thisSub.tick.bind(thisSub));
+		 		window.clearInterval(counterId);
+		 	}
+		}, 1000);
 	};
 
 	//
@@ -1044,16 +1082,10 @@ var GraphicsSystem = function(entities) {
 	};
 
 
-
-
 exports.GraphicsSystem = GraphicsSystem;
 },{"../entities/pipe":14}],20:[function(require,module,exports){
 //
-// Required by game.js --> main.js
-//
-
-//
-// InputSystem handles all events triggered by the user
+// InputSystem handles all events triggered by the user related to the game itself
 // InputSystem(entities)
 //  |_ entities[]
 //  |_ canvas
@@ -1061,8 +1093,8 @@ exports.GraphicsSystem = GraphicsSystem;
 //  |_ run()
 //  \_ flap()
 
-var InputSystem = function(entities) {
-	this.entities = entities;
+var InputSystem = function(game) {
+	this.entities = null;
 	this.canvas   = document.getElementById('main-canvas');
 	this.overlay  = document.getElementById('overlay');
 };
@@ -1092,11 +1124,6 @@ var InputSystem = function(entities) {
 exports.InputSystem = InputSystem;
 },{}],21:[function(require,module,exports){
 //
-// Required by game.js --> main.js
-//
-var collisionSystem = require('./collision');
-
-//
 // PhysicsSystem updates physics components of entities. It runs in sync with CollisionSystem.
 // PhysicsSystem
 //  |_ entities[]
@@ -1106,9 +1133,9 @@ var collisionSystem = require('./collision');
 //  |_ resume()
 //  \_ tick()
 
-var PhysicsSystem = function(entities) {
-	this.entities = entities;
-	this.collisionSystem = new collisionSystem.CollisionSystem(entities);
+var PhysicsSystem = function() {
+	this.entities = null;
+	this.collisionSystem = null;
 	this.physicsTick = 0;
 };
 
@@ -1156,11 +1183,7 @@ var PhysicsSystem = function(entities) {
 
 
 exports.PhysicsSystem = PhysicsSystem;
-},{"./collision":18}],22:[function(require,module,exports){
-//
-// Required by collision.js
-//
-
+},{}],22:[function(require,module,exports){
 //
 // ScoreSystem interacts with the game and Local Storage API
 // ScoreSystem
