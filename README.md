@@ -2,6 +2,10 @@
 
 This is the barebone gameplay of the popular flappy bird. Current iteration has working graphics, physics, collision, and scoring system.
 
+## Game Location
+
+/site/game/
+
 ## Future Iterations
 
 - Fine-tune collision detection
