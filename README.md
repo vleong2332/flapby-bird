@@ -1,4 +1,4 @@
-# flapby-bird
+# Flapby Bird
 
 This is the barebone gameplay of the popular flappy bird. Current iteration has working graphics, physics, collision, and scoring system.
 
