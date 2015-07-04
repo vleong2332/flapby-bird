@@ -35,6 +35,10 @@ var PhysicsComponent = function(entity) {
 		x:0,
 		y:0
 	};
+	this.rotation = {
+		deg: 0,
+		max: 35
+	};
 };
 
 	//
@@ -46,6 +50,9 @@ var PhysicsComponent = function(entity) {
 		this.velocity.y += this.acceleration.y * delta;
 		this.position.x += this.velocity.x * delta;
 		this.position.y += this.velocity.y * delta;
+		if (this.rotation.deg < this.rotation.max) {
+			this.rotation.deg -= this.velocity.y * delta * 150;
+		}
 	};
 
 

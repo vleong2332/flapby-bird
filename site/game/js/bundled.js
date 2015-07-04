@@ -194,23 +194,33 @@ exports.RectCollisionComponent = RectCollisionComponent;
 //
 
 var BirdGraphicsComponent = function(entity) {
-    this.entity = entity;
+   this.entity = entity;
 };
 
-    //
-    // Function: Draw a circle on canvas
-    //
-    BirdGraphicsComponent.prototype.draw = function(context) {
-        var position = this.entity.components.physics.position;
+   //
+   // Function: Draw a circle on canvas
+   //
+   BirdGraphicsComponent.prototype.draw = function(context) {
+      var position = this.entity.components.physics.position;
+      var rotation = this.entity.components.physics.rotation.deg;
+      var sprite   = this.entity.components.sprite;
 
-        context.save();
-        context.translate(position.x, position.y);
-        context.beginPath();
-        context.arc(0, 0, 0.02, 0, 2 * Math.PI);
-        context.fill();
-        context.closePath();
-        context.restore();
-    };
+      context.save();
+      context.translate(position.x, position.y);
+      context.scale(1, -1);
+      context.rotate(rotation * Math.PI / 180);
+      context.drawImage(
+         sprite,
+         50, 50, -50, -50,
+         -0.03, -0.03, 0.06, 0.06);
+      // context.translate(-position.x, -position.y);
+      // context.scale(-1, 1);
+      // context.beginPath();
+      // context.arc(0, 0, 0.026, 0, 2 * Math.PI);
+      // context.fill();
+      // context.closePath();
+      context.restore();
+   };
 
 
 exports.BirdGraphicsComponent = BirdGraphicsComponent;
@@ -275,19 +285,27 @@ exports.GroundGraphicsComponent = GroundGraphicsComponent;
 //  \_ draw()
 //
 
-var PipeGraphicsComponent = function(entity) {
+var PipeGraphicsComponent = function(entity, background) {
 	this.entity = entity;
+	this.background = background;
 };
 
 		PipeGraphicsComponent.prototype.draw = function(context) {
 			var position = this.entity.components.physics.position,
-					width    = this.entity.size.x,
-					height   = this.entity.size.y;
+				 width    = this.entity.size.x,
+				 height   = this.entity.size.y;
+			var pattern = context.createPattern(this.background, 'repeat');
+			var scale = 1000;
+			var W = width * scale;
+			var H = height * scale;
 			//
 			context.save();
-			context.fillStyle = '#006500';
-		  context.fillRect(position.x, position.y, width, (position.y == 1 ? -height : height));
-		  context.restore();
+			context.fillStyle   = pattern;
+			context.fillRect(position.x, position.y, W/1000, (position.y == 1 ? -H/1000 : H/1000));
+			context.strokeStyle = '#333';
+			context.lineWidth   = 0.01;
+		   context.strokeRect(position.x, position.y, width, (position.y == 1 ? -height : height));
+		   context.restore();
 		};
 
 exports.PipeGraphicsComponent = PipeGraphicsComponent;
@@ -383,6 +401,10 @@ var PhysicsComponent = function(entity) {
 		x:0,
 		y:0
 	};
+	this.rotation = {
+		deg: 0,
+		max: 35
+	};
 };
 
 	//
@@ -394,6 +416,9 @@ var PhysicsComponent = function(entity) {
 		this.velocity.y += this.acceleration.y * delta;
 		this.position.x += this.velocity.x * delta;
 		this.position.y += this.velocity.y * delta;
+		if (this.rotation.deg < this.rotation.max) {
+			this.rotation.deg -= this.velocity.y * delta * 150;
+		}
 	};
 
 
@@ -404,8 +429,8 @@ exports.PhysicsComponent = PhysicsComponent;
 //             collision.js
 //
 var graphicsComponent  = require('../components/graphics/bird'),
-		physicsComponent   = require('../components/physics/physics'),
-		collisionComponent = require('../components/collision/circle');
+	 physicsComponent   = require('../components/physics/physics'),
+	 collisionComponent = require('../components/collision/circle');
 
 //
 // Bird
@@ -418,16 +443,23 @@ var graphicsComponent  = require('../components/graphics/bird'),
 //
 
 var Bird = function() {
-	this.radius = 0.02;
+	this.radius = 0.026;
 
 	// Building up components
 	var graphics  = new graphicsComponent.BirdGraphicsComponent(this);
 	var physics   = new physicsComponent.PhysicsComponent(this);
 	var collision = new collisionComponent.CircleCollisionComponent(this, this.radius);
 
+	var sprite = document.createElement("img");
+	sprite.addEventListener('error', function() {
+		console.log('Could not load bird sprite');
+	});
+   sprite.src = "img/bird_sprite.png";
+
 	// Setting components
 	physics.position.y     = 0.5; // Starts at the center
 	physics.acceleration.y = -1.75; // Falling rate
+	// physics.rotation.deg = 35;
 	// Add bird's onCollision event to the collision component
 	// but 'this' will refer to the bird, instead of the component itself
 	collision.onCollision = this.onCollision.bind(this);
@@ -436,7 +468,8 @@ var Bird = function() {
 	this.components = {
 		graphics:  graphics,
 		physics:   physics,
-		collision: collision
+		collision: collision,
+		sprite:    sprite
 	};
 };
 
@@ -562,14 +595,14 @@ var graphicsComponent  = require('../components/graphics/pipe'),
 //     \_ collision
 //
 
-var Pipe = function(loc, height) {
+var Pipe = function(loc, height, background) {
 	this.size = {
-		x: 0.2, // SETTING
+		x: 0.18, // SETTING
 		y: height
  	};
 	
 	// Building components
-	var graphics  = new graphicsComponent.PipeGraphicsComponent(this);
+	var graphics  = new graphicsComponent.PipeGraphicsComponent(this, background);
 	var physics   = new physicsComponent.PhysicsComponent(this);
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
 
@@ -696,16 +729,16 @@ var Keeper = function(loc, height) {
 exports.Keeper = Keeper;
 },{"../components/collision/rect.js":3,"../components/graphics/scoreKeeper":9,"../components/physics/physics":10}],17:[function(require,module,exports){
 var graphicsSystem  = require('./systems/graphics'),
-		physicsSystem   = require('./systems/physics'),
-		inputSystem     = require('./systems/input'),
-		scoreSystem     = require('./systems/score'),
-		collisionSystem = require('./systems/collision'),
-		bird            = require('./entities/bird'),
-		pipe            = require('./entities/pipe'),
-		ground          = require('./entities/ground'),
-		ceiling         = require('./entities/ceiling'),
-		eater           = require('./entities/pipeEater'),
-		keeper          = require('./entities/scoreKeeper');
+	 physicsSystem   = require('./systems/physics'),
+	 inputSystem     = require('./systems/input'),
+	 scoreSystem     = require('./systems/score'),
+	 collisionSystem = require('./systems/collision'),
+	 bird            = require('./entities/bird'),
+	 pipe            = require('./entities/pipe'),
+	 ground          = require('./entities/ground'),
+	 ceiling         = require('./entities/ceiling'),
+	 eater           = require('./entities/pipeEater'),
+	 keeper          = require('./entities/scoreKeeper');
 
 // FlapbyBird is the main function for the game. It starts and stops the game.
 // FlapbyBird
@@ -726,7 +759,7 @@ var FlapbyBird = function() {
 
 	// Array containing graphical entities on the canvas
 	this.entities = [new eater.Eater(), new keeper.Keeper(), new bird.Bird(),
-									 new ground.Ground(), new ceiling.Ceiling()];
+						  new ground.Ground(), new ceiling.Ceiling()];
 	
 	// Various system that handle the array
 	this.input     = new inputSystem.InputSystem();
@@ -787,7 +820,47 @@ var FlapbyBird = function() {
 
 
 exports.FlapbyBird = FlapbyBird;
-},{"./entities/bird":11,"./entities/ceiling":12,"./entities/ground":13,"./entities/pipe":14,"./entities/pipeEater":15,"./entities/scoreKeeper":16,"./systems/collision":18,"./systems/graphics":19,"./systems/input":20,"./systems/physics":21,"./systems/score":22}],18:[function(require,module,exports){
+},{"./entities/bird":11,"./entities/ceiling":12,"./entities/ground":13,"./entities/pipe":14,"./entities/pipeEater":15,"./entities/scoreKeeper":16,"./systems/collision":19,"./systems/graphics":20,"./systems/input":21,"./systems/physics":22,"./systems/score":23}],18:[function(require,module,exports){
+var AssetManager = function() {
+   this.fetchQueue = [];
+   this.successCount = 0;
+   this.failedCount = 0;
+   this.cache = {};
+};
+
+AssetManager.prototype.queueAsset = function(path) {
+   this.fetchQueue.push(path);
+};
+
+AssetManager.prototype.downloadAssets = function(callback) {
+   if (this.fetchQueue.length === 0) { callback(); }
+   for (var i = 0; i < this.fetchQueue.length; i++) {
+      var path = this.fetchQueue[i];
+      var img = new Image();
+      var that = this;
+      img.addEventListener('load', function() {
+         that.successCount += 1;
+         if (that.isDone()) { callback(); }
+      }, false);
+      img.addEventListener('error', function() {
+         that.failedCount += 1;
+         if (that.isDone()) { callback(); }
+      }, false);
+      img.src = path;
+      this.cache[path] = img;
+   }
+};
+
+AssetManager.prototype.isDone = function() {
+   return (this.fetchQueue.length == this.successCount + this.failedCount);
+};
+
+AssetManager.prototype.getAsset = function(path) {
+   return this.cache[path];
+};
+
+exports.AssetManager = AssetManager;
+},{}],19:[function(require,module,exports){
 var scoreSystem    = require ('./score'),
 		eater          = require ('../entities/pipeEater'),
 		pipe           = require ('../entities/pipe'),
@@ -868,8 +941,9 @@ var CollisionSystem = function() {
 
 
 exports.CollisionSystem = CollisionSystem;
-},{"../entities/bird":11,"../entities/pipe":14,"../entities/pipeEater":15,"../entities/scoreKeeper":16,"./score":22}],19:[function(require,module,exports){
-var pipe = require('../entities/pipe');
+},{"../entities/bird":11,"../entities/pipe":14,"../entities/pipeEater":15,"../entities/scoreKeeper":16,"./score":23}],20:[function(require,module,exports){
+var assetManager    = require('./assetManager');
+var pipe            = require('../entities/pipe');
 
 // Graphics System is responsible for putting visuals on the canvas
 // GraphicsSystem(entities)
@@ -904,14 +978,29 @@ var GraphicsSystem = function() {
 	this.context      = this.canvas.getContext('2d');
 	this.animFrame    = 0; // Will contained ID returned by requestAnimationFrame()
 	this.pipeCreation = 50; // Indicates how many ticks between creating new pipes
+	this.bgPosX       = 1.2;
+	this.assetManager = new assetManager.AssetManager();
+	this.assets       = {};
 };
 
 	//
 	// Function: Initialize the first tick
 	//
 	GraphicsSystem.prototype.init = function() {
-		this.tick.bind(this);
-		this.tick(1); // Indicate initialization. Only run tick one time.
+		this.assetManager.queueAsset('img/bird_sprite.png');
+		this.assetManager.queueAsset('img/desert-bg.png');
+		this.assetManager.queueAsset('img/sky-bg.png');
+		this.assetManager.queueAsset('img/acg01041.png');
+		var that = this;
+		this.assetManager.downloadAssets(function() {
+			that.assets = {
+				skyBg:    that.assetManager.getAsset('img/sky-bg.png'),
+				desertBg: that.assetManager.getAsset('img/desert-bg.png'),
+				pipeBg:   that.assetManager.getAsset('img/acg01041.png')
+			};
+			that.tick.bind(that);
+			that.tick(1); // Indicate initialization. Only run tick one time.
+		});
 	};
 
 	//
@@ -939,8 +1028,8 @@ var GraphicsSystem = function() {
 	GraphicsSystem.prototype.reset = function() {
 		window.cancelAnimationFrame(this.animFrame);
 	 	var counter   = 3,
-				counterId = 0,
-				overlay = document.getElementById('reset-overlay');
+			 counterId = 0,
+			 overlay = document.getElementById('reset-overlay');
 		
 		var thisSub = this;
 		counterId = window.setInterval(function() {
@@ -966,9 +1055,9 @@ var GraphicsSystem = function() {
 	GraphicsSystem.prototype.tick = function(init) {
 		// Ensure drawing area is the same as canvas area even when resize
 		if (this.canvas.width   != this.canvas.offsetWidth ||
-			  this.canvas.height  != this.canvas.offsetHeight) {
-			this.canvas.width  = this.canvas.offsetWidth;
-			this.canvas.height = this.canvas.offsetHeight;
+			 this.canvas.height  != this.canvas.offsetHeight) {
+		    this.canvas.width    = this.canvas.offsetWidth;
+			 this.canvas.height   = this.canvas.offsetHeight;
 		}
 
 		// Reset the canvas at every tick
@@ -984,6 +1073,14 @@ var GraphicsSystem = function() {
 		// Dawing grid below the entities
 		// Uncomment to see
 		//this.drawGrid();
+		// console.log(init);
+		if (init === 1) {
+			this.drawBackground([this.assets.desertBg, this.assets.skyBg], this.bgPosX);
+		}
+		else {
+			this.bgPosX -= 0.002;
+			this.drawBackground([this.assets.desertBg, this.assets.skyBg], this.bgPosX);
+		}
 
 		// Create new pipes every so often
 		if (--this.pipeCreation === 0) {
@@ -999,7 +1096,7 @@ var GraphicsSystem = function() {
 				continue;
 			}
 			// If there is graphic component, execute it's draw()
-			entity.components.graphics.draw(this.context);
+			entity.components.graphics.draw(this.context);  
 		}
 
 		// Dawing grid on top of the entities
@@ -1021,15 +1118,15 @@ var GraphicsSystem = function() {
 	// Function: Create one pair of pipes with random gap size
 	//
 	GraphicsSystem.prototype.createNewPipes = function() {
-		var minGap    = 0.15, // SETTING
-				maxGap    = 0.45, // SETTING
-				gap       = Math.random() * (maxGap - minGap) + minGap,
-				buffer    = 0.1,
-				ttlHeight = 1 - buffer - gap,
-				uprHeight = buffer + (Math.random() * (ttlHeight - buffer) + buffer),
-				lwrHeight = buffer + (ttlHeight - uprHeight),
-				upperPipe = new pipe.Pipe('upper', uprHeight),
-				lowerPipe = new pipe.Pipe('lower', lwrHeight);
+		var minGap    = 0.18, // SETTING
+			 maxGap    = 0.38, // SETTING
+			 gap       = Math.random() * (maxGap - minGap) + minGap,
+			 buffer    = 0.1,
+			 ttlHeight = 1 - buffer - gap,
+			 uprHeight = buffer + (Math.random() * (ttlHeight - buffer) + buffer),
+			 lwrHeight = buffer + (ttlHeight - uprHeight),
+			 upperPipe = new pipe.Pipe('upper', uprHeight, this.assets.pipeBg),
+			 lowerPipe = new pipe.Pipe('lower', lwrHeight, this.assets.pipeBg);
 		// Insert the two pipes into the list of entities starting at the 4th position
 		// The first three entities in the lists are eater, keeper, and bird.
 		this.entities.splice(3, 0, upperPipe, lowerPipe);
@@ -1051,6 +1148,28 @@ var GraphicsSystem = function() {
 	GraphicsSystem.prototype.deleteLastTwoPipes = function() {
 		// Remove the last two pipes in the list of entities
 		this.entities.splice((this.entities.length-4), 2);
+	};
+
+	//
+	// Function:
+	//
+	GraphicsSystem.prototype.drawBackground = function(bgArray, xPos) {
+		this.context.save();
+		this.context.scale(1, -1);
+		// Draw sky background
+		this.context.drawImage(bgArray[1],
+			0, 0, 1600, 768,
+			1.2, -1, -2.4, 1);
+		// Draw desert background
+		this.context.drawImage(bgArray[0],
+			0, 0, 1600, 768,
+			xPos, -1, -2.4, 1);
+		this.context.drawImage(bgArray[0],
+			0, 0, 1600, 768,
+			(2.4 + xPos), -1, -2.4, 1);
+		// console.log(xPos);
+		if (xPos < -1.2) { this.bgPosX = 1.2; }
+		this.context.restore();
 	};
 
 	//
@@ -1083,7 +1202,7 @@ var GraphicsSystem = function() {
 
 
 exports.GraphicsSystem = GraphicsSystem;
-},{"../entities/pipe":14}],20:[function(require,module,exports){
+},{"../entities/pipe":14,"./assetManager":18}],21:[function(require,module,exports){
 //
 // InputSystem handles all events triggered by the user related to the game itself
 // InputSystem(entities)
@@ -1118,11 +1237,12 @@ var InputSystem = function(game) {
 			var bird = this.entities[2];
 			// Make the bird jumps by changing it's velocity upwards
 			bird.components.physics.velocity.y = 0.6; // SETTING
+			bird.components.physics.rotation.deg = -15;
 		};
 
 
 exports.InputSystem = InputSystem;
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 //
 // PhysicsSystem updates physics components of entities. It runs in sync with CollisionSystem.
 // PhysicsSystem
@@ -1183,7 +1303,7 @@ var PhysicsSystem = function() {
 
 
 exports.PhysicsSystem = PhysicsSystem;
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 //
 // ScoreSystem interacts with the game and Local Storage API
 // ScoreSystem

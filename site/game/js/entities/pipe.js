@@ -18,14 +18,14 @@ var graphicsComponent  = require('../components/graphics/pipe'),
 //     \_ collision
 //
 
-var Pipe = function(loc, height) {
+var Pipe = function(loc, height, background) {
 	this.size = {
-		x: 0.2, // SETTING
+		x: 0.18, // SETTING
 		y: height
  	};
 	
 	// Building components
-	var graphics  = new graphicsComponent.PipeGraphicsComponent(this);
+	var graphics  = new graphicsComponent.PipeGraphicsComponent(this, background);
 	var physics   = new physicsComponent.PhysicsComponent(this);
 	var collision = new collisionComponent.RectCollisionComponent(this, this.size);
 

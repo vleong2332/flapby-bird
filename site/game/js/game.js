@@ -1,14 +1,14 @@
 var graphicsSystem  = require('./systems/graphics'),
-		physicsSystem   = require('./systems/physics'),
-		inputSystem     = require('./systems/input'),
-		scoreSystem     = require('./systems/score'),
-		collisionSystem = require('./systems/collision'),
-		bird            = require('./entities/bird'),
-		pipe            = require('./entities/pipe'),
-		ground          = require('./entities/ground'),
-		ceiling         = require('./entities/ceiling'),
-		eater           = require('./entities/pipeEater'),
-		keeper          = require('./entities/scoreKeeper');
+	 physicsSystem   = require('./systems/physics'),
+	 inputSystem     = require('./systems/input'),
+	 scoreSystem     = require('./systems/score'),
+	 collisionSystem = require('./systems/collision'),
+	 bird            = require('./entities/bird'),
+	 pipe            = require('./entities/pipe'),
+	 ground          = require('./entities/ground'),
+	 ceiling         = require('./entities/ceiling'),
+	 eater           = require('./entities/pipeEater'),
+	 keeper          = require('./entities/scoreKeeper');
 
 // FlapbyBird is the main function for the game. It starts and stops the game.
 // FlapbyBird
@@ -29,7 +29,7 @@ var FlapbyBird = function() {
 
 	// Array containing graphical entities on the canvas
 	this.entities = [new eater.Eater(), new keeper.Keeper(), new bird.Bird(),
-									 new ground.Ground(), new ceiling.Ceiling()];
+						  new ground.Ground(), new ceiling.Ceiling()];
 	
 	// Various system that handle the array
 	this.input     = new inputSystem.InputSystem();

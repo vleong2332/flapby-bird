@@ -32,6 +32,7 @@ var InputSystem = function(game) {
 			var bird = this.entities[2];
 			// Make the bird jumps by changing it's velocity upwards
 			bird.components.physics.velocity.y = 0.6; // SETTING
+			bird.components.physics.rotation.deg = -15;
 		};
 
 
