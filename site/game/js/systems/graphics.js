@@ -115,7 +115,6 @@ var GraphicsSystem = function() {
 		    this.canvas.width    = this.canvas.offsetWidth;
 			 this.canvas.height   = this.canvas.offsetHeight;
 		}
-
 		// Reset the canvas at every tick
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		// Save a clean state of the canvas
